@@ -20,6 +20,7 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
     messages,
     isStreaming,
     streamingBlocks,
+    messageQueue,
     fetchMessages,
     fetchActiveSession,
     sendMessage,
@@ -77,7 +78,11 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
         streamingBlocks={streamingBlocks}
         isStreaming={isStreaming}
       />
-      <MessageInput onSend={handleSend} disabled={isStreaming} />
+      <MessageInput
+        onSend={handleSend}
+        isStreaming={isStreaming}
+        queueCount={messageQueue.length}
+      />
     </div>
   );
 }

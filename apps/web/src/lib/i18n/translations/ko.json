@@ -40,8 +40,10 @@
   "chat": {
     "title": "채팅",
     "placeholder": "만들고 싶은 것을 설명하세요...",
+    "queuePlaceholder": "다음 메시지를 입력하세요...",
     "send": "전송",
     "thinking": "AI가 생각 중...",
+    "queueCount": "{count}개의 메시지가 대기 중",
     "toolRunning": "실행 중",
     "toolCompleted": "완료",
     "newConversation": "새 대화"

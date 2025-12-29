@@ -40,8 +40,10 @@
   "chat": {
     "title": "Chat",
     "placeholder": "Describe what you want to build...",
+    "queuePlaceholder": "Queue another message...",
     "send": "Send",
     "thinking": "AI is thinking...",
+    "queueCount": "{count} message(s) queued",
     "toolRunning": "Running",
     "toolCompleted": "Completed",
     "newConversation": "New Chat"

@@ -14,6 +14,12 @@ export interface StreamingBlock {
   result?: string;
 }
 
+export interface QueuedMessage {
+  id: string;
+  content: string;
+  status: "queued" | "processing";
+}
+
 interface ActiveSessionStatus {
   isStreaming: boolean;
   currentTool: string | null;
@@ -27,10 +33,14 @@ interface ChatState {
   isStreaming: boolean;
   streamingBlocks: StreamingBlock[];
   error: string | null;
+  messageQueue: QueuedMessage[];
+  isProcessingQueue: boolean;
 
   fetchMessages: (projectId: string) => Promise<void>;
   fetchActiveSession: (projectId: string) => Promise<void>;
-  sendMessage: (projectId: string, content: string) => Promise<void>;
+  sendMessage: (projectId: string, content: string, fromQueue?: boolean) => Promise<void>;
+  queueMessage: (projectId: string, content: string) => void;
+  processQueue: (projectId: string) => Promise<void>;
   addMessage: (message: ChatMessage) => void;
   clearMessages: () => void;
   clearError: () => void;
@@ -41,6 +51,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isStreaming: false,
   streamingBlocks: [],
   error: null,
+  messageQueue: [],
+  isProcessingQueue: false,
 
   fetchMessages: async (projectId: string) => {
     try {
@@ -184,8 +196,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
   },
 
-  sendMessage: async (projectId: string, content: string) => {
-    // Optimistic update: add user message immediately
+  // Queue a message while streaming is in progress
+  queueMessage: (projectId: string, content: string) => {
+    const queuedMessage: QueuedMessage = {
+      id: `queue-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      content,
+      status: "queued",
+    };
+
+    // Add to queue and also add as a user message for immediate display
     const optimisticUserMessage: ChatMessage = {
       id: `temp-${Date.now()}`,
       projectId,
@@ -195,11 +214,74 @@ export const useChatStore = create<ChatState>((set, get) => ({
     };
 
     set((state) => ({
+      messageQueue: [...state.messageQueue, queuedMessage],
       messages: [...state.messages, optimisticUserMessage],
+    }));
+  },
+
+  // Process the message queue sequentially
+  processQueue: async (projectId: string) => {
+    const state = get();
+
+    // If already processing or queue is empty, do nothing
+    if (state.isProcessingQueue || state.messageQueue.length === 0) {
+      return;
+    }
+
+    set({ isProcessingQueue: true });
+
+    while (get().messageQueue.length > 0) {
+      const queue = get().messageQueue;
+      const nextMessage = queue[0];
+
+      // Mark as processing
+      set((state) => ({
+        messageQueue: state.messageQueue.map((m, i) =>
+          i === 0 ? { ...m, status: "processing" as const } : m
+        ),
+      }));
+
+      // Process the message
+      await get().sendMessage(projectId, nextMessage.content, true);
+
+      // Remove from queue
+      set((state) => ({
+        messageQueue: state.messageQueue.slice(1),
+      }));
+    }
+
+    set({ isProcessingQueue: false });
+  },
+
+  sendMessage: async (projectId: string, content: string, fromQueue = false) => {
+    const state = get();
+
+    // If streaming and not from queue, add to queue instead
+    if (state.isStreaming && !fromQueue) {
+      get().queueMessage(projectId, content);
+      return;
+    }
+
+    // Optimistic update: add user message immediately (only if not from queue, as queue already added it)
+    if (!fromQueue) {
+      const optimisticUserMessage: ChatMessage = {
+        id: `temp-${Date.now()}`,
+        projectId,
+        role: Role.USER,
+        content,
+        createdAt: new Date(),
+      };
+
+      set((state) => ({
+        messages: [...state.messages, optimisticUserMessage],
+      }));
+    }
+
+    set({
       isStreaming: true,
       streamingBlocks: [],
       error: null
-    }));
+    });
 
     try {
       const response = await fetch(
@@ -300,6 +382,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } finally {
       // Keep streamingBlocks visible, only mark streaming as done
       set({ isStreaming: false });
+
+      // Process next message in queue if any
+      if (get().messageQueue.length > 0) {
+        // Use setTimeout to avoid blocking
+        setTimeout(() => get().processQueue(projectId), 100);
+      }
     }
   },
 
@@ -310,7 +398,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
 
   clearMessages: () => {
-    set({ messages: [], streamingBlocks: [] });
+    set({ messages: [], streamingBlocks: [], messageQueue: [] });
   },
 
   clearError: () => {

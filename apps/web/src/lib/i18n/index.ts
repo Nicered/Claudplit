@@ -33,8 +33,9 @@ export const useLocaleStore = create<LocaleState>()(
 
 /**
  * Get a translation by key path (e.g., "common.loading")
+ * Supports variable substitution with {varName} syntax
  */
-export function t(key: string, locale?: Locale): string {
+export function t(key: string, locale?: Locale, variables?: Record<string, string | number>): string {
   const currentLocale = locale || useLocaleStore.getState().locale;
   const keys = key.split(".");
 
@@ -57,7 +58,16 @@ export function t(key: string, locale?: Locale): string {
     }
   }
 
-  return typeof value === "string" ? value : key;
+  let result = typeof value === "string" ? value : key;
+
+  // Variable substitution
+  if (variables) {
+    for (const [varName, varValue] of Object.entries(variables)) {
+      result = result.replace(new RegExp(`\\{${varName}\\}`, "g"), String(varValue));
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -67,8 +77,8 @@ export function useTranslation() {
   const locale = useLocaleStore((state) => state.locale);
   const setLocale = useLocaleStore((state) => state.setLocale);
 
-  const translate = (key: string): string => {
-    return t(key, locale);
+  const translate = (key: string, variables?: Record<string, string | number>): string => {
+    return t(key, locale, variables);
   };
 
   return {
