@@ -1,0 +1,66 @@
+{
+  "common": {
+    "appName": "Claudplit",
+    "loading": "Loading...",
+    "error": "Error",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "close": "Close",
+    "refresh": "Refresh",
+    "settings": "Settings"
+  },
+  "header": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "home": {
+    "title": "My Projects",
+    "noProjects": "No projects yet",
+    "createFirst": "Create your first project to get started"
+  },
+  "project": {
+    "create": "New Project",
+    "createTitle": "Create New Project",
+    "name": "Project Name",
+    "namePlaceholder": "my-awesome-app",
+    "type": "Project Type",
+    "typeWeb": "Web App",
+    "typeNative": "Native App",
+    "backendStack": "Backend Stack",
+    "backendNone": "Frontend Only",
+    "backendExpress": "Express (Node.js)",
+    "backendFastapi": "FastAPI (Python)",
+    "delete": "Delete Project",
+    "deleteConfirm": "Are you sure you want to delete this project?",
+    "updated": "Updated"
+  },
+  "chat": {
+    "placeholder": "Describe what you want to build...",
+    "send": "Send",
+    "thinking": "AI is thinking...",
+    "toolRunning": "Running",
+    "toolCompleted": "Completed"
+  },
+  "preview": {
+    "title": "Preview",
+    "start": "Start Preview",
+    "stop": "Stop Preview",
+    "starting": "Starting...",
+    "notReady": "Project not ready for preview",
+    "waitForAI": "Wait for AI to create the project files",
+    "openInNewTab": "Open in New Tab"
+  },
+  "fileExplorer": {
+    "title": "Files",
+    "empty": "No files yet",
+    "loading": "Loading files...",
+    "error": "Failed to load files"
+  },
+  "language": {
+    "select": "Language",
+    "en": "English",
+    "ko": "한국어"
+  }
+}

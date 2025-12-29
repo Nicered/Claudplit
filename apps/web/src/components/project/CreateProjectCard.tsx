@@ -2,12 +2,15 @@
 
 import { Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useTranslation } from "@/lib/i18n";
 
 interface CreateProjectCardProps {
   onClick: () => void;
 }
 
 export function CreateProjectCard({ onClick }: CreateProjectCardProps) {
+  const { t } = useTranslation();
+
   return (
     <Card
       className="cursor-pointer border-dashed transition-colors hover:border-primary hover:bg-muted/50"
@@ -18,7 +21,7 @@ export function CreateProjectCard({ onClick }: CreateProjectCardProps) {
           <Plus className="h-6 w-6 text-muted-foreground" />
         </div>
         <span className="text-sm font-medium text-muted-foreground">
-          새 프로젝트
+          {t("project.create")}
         </span>
       </CardContent>
     </Card>

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ProjectType, BackendFramework } from "@claudplit/shared";
+import { useTranslation } from "@/lib/i18n";
 
 interface CreateProjectModalProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function CreateProjectModal({
   onSubmit,
   isLoading,
 }: CreateProjectModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState("");
   const [projectType, setProjectType] = useState<ProjectType>(ProjectType.WEB);
   const [backendFramework, setBackendFramework] = useState<BackendFramework>(
@@ -50,28 +52,28 @@ export function CreateProjectModal({
       <DialogContent className="max-w-lg">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>새 프로젝트 생성</DialogTitle>
+            <DialogTitle>{t("project.createTitle")}</DialogTitle>
             <DialogDescription>
-              프로젝트 이름과 스택을 선택하세요.
+              {t("project.name")}
             </DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <label htmlFor="name" className="text-sm font-medium">
-                프로젝트 이름
+                {t("project.name")}
               </label>
               <Input
                 id="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="my-awesome-app"
+                placeholder={t("project.namePlaceholder")}
                 autoFocus
               />
             </div>
 
             <div className="grid gap-2">
-              <label className="text-sm font-medium">프로젝트 유형</label>
+              <label className="text-sm font-medium">{t("project.type")}</label>
               <div className="grid grid-cols-2 gap-2">
                 <Button
                   type="button"
@@ -80,7 +82,7 @@ export function CreateProjectModal({
                   onClick={() => setProjectType(ProjectType.WEB)}
                 >
                   <span className="text-xl">🌐</span>
-                  <span className="text-xs">웹앱</span>
+                  <span className="text-xs">{t("project.typeWeb")}</span>
                 </Button>
                 <Button
                   type="button"
@@ -89,14 +91,14 @@ export function CreateProjectModal({
                   onClick={() => setProjectType(ProjectType.NATIVE)}
                 >
                   <span className="text-xl">📱</span>
-                  <span className="text-xs">네이티브 앱</span>
+                  <span className="text-xs">{t("project.typeNative")}</span>
                 </Button>
               </div>
             </div>
 
             {projectType === ProjectType.WEB && (
               <div className="grid gap-2">
-                <label className="text-sm font-medium">백엔드 스택</label>
+                <label className="text-sm font-medium">{t("project.backendStack")}</label>
                 <div className="grid grid-cols-3 gap-2">
                   <Button
                     type="button"
@@ -110,9 +112,7 @@ export function CreateProjectModal({
                   >
                     <span className="text-lg">⚡</span>
                     <span className="text-xs text-center leading-tight">
-                      프론트엔드
-                      <br />
-                      전용
+                      {t("project.backendNone")}
                     </span>
                   </Button>
                   <Button
@@ -160,10 +160,10 @@ export function CreateProjectModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              취소
+              {t("common.cancel")}
             </Button>
             <Button type="submit" disabled={!name.trim() || isLoading}>
-              {isLoading ? "생성 중..." : "생성"}
+              {isLoading ? t("common.loading") : t("common.create")}
             </Button>
           </DialogFooter>
         </form>

@@ -1,0 +1,66 @@
+{
+  "common": {
+    "appName": "Claudplit",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "create": "생성",
+    "close": "닫기",
+    "refresh": "새로고침",
+    "settings": "설정"
+  },
+  "header": {
+    "home": "홈",
+    "settings": "설정"
+  },
+  "home": {
+    "title": "내 프로젝트",
+    "noProjects": "프로젝트가 없습니다",
+    "createFirst": "첫 번째 프로젝트를 만들어 시작하세요"
+  },
+  "project": {
+    "create": "새 프로젝트",
+    "createTitle": "새 프로젝트 생성",
+    "name": "프로젝트 이름",
+    "namePlaceholder": "my-awesome-app",
+    "type": "프로젝트 유형",
+    "typeWeb": "웹 앱",
+    "typeNative": "네이티브 앱",
+    "backendStack": "백엔드 스택",
+    "backendNone": "프론트엔드 전용",
+    "backendExpress": "Express (Node.js)",
+    "backendFastapi": "FastAPI (Python)",
+    "delete": "프로젝트 삭제",
+    "deleteConfirm": "이 프로젝트를 삭제하시겠습니까?",
+    "updated": "업데이트"
+  },
+  "chat": {
+    "placeholder": "만들고 싶은 것을 설명하세요...",
+    "send": "전송",
+    "thinking": "AI가 생각 중...",
+    "toolRunning": "실행 중",
+    "toolCompleted": "완료"
+  },
+  "preview": {
+    "title": "미리보기",
+    "start": "미리보기 시작",
+    "stop": "미리보기 중지",
+    "starting": "시작 중...",
+    "notReady": "프로젝트가 미리보기 준비가 되지 않았습니다",
+    "waitForAI": "AI가 프로젝트 파일을 생성할 때까지 기다려주세요",
+    "openInNewTab": "새 탭에서 열기"
+  },
+  "fileExplorer": {
+    "title": "파일",
+    "empty": "파일이 없습니다",
+    "loading": "파일 로딩 중...",
+    "error": "파일 로드 실패"
+  },
+  "language": {
+    "select": "언어",
+    "en": "English",
+    "ko": "한국어"
+  }
+}
