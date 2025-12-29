@@ -4,8 +4,8 @@ import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import type { ProjectListItem } from "@claudplit/shared";
-import { projectTypeLabels } from "@claudplit/shared";
+import type { ProjectListItem } from "@claudeship/shared";
+import { projectTypeLabels } from "@claudeship/shared";
 
 interface ProjectCardProps {
   project: ProjectListItem;

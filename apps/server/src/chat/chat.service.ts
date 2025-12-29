@@ -98,11 +98,24 @@ export class ChatService {
             project.projectType,
             project.backendFramework
           );
-          const fullPrompt = `[System Context]\n${systemPrompt}\n\n[User Request]\n${content}`;
 
-          // Execute Claude CLI
+          // If no session exists, include recent conversation history as context
+          let conversationContext = "";
+          if (!project.claudeSessionId) {
+            conversationContext = await this.buildContextFromHistory(projectId);
+            if (conversationContext) {
+              this.logger.log(
+                `Including conversation history context (no existing session)`
+              );
+            }
+          }
+
+          const fullPrompt = `[System Context]\n${systemPrompt}\n\n${conversationContext}[User Request]\n${content}`;
+
+          // Execute Claude CLI with session resumption if available
           let fullResponse = "";
           let totalCost = 0;
+          let newClaudeSessionId: string | null = null;
           const toolActivities: Array<{
             name: string;
             input?: Record<string, unknown>;
@@ -112,12 +125,19 @@ export class ChatService {
           const cliStream = this.claudeCliService.executePrompt(
             projectPath,
             fullPrompt,
-            sessionId
+            sessionId,
+            project.claudeSessionId || undefined
           );
 
           cliStream.subscribe({
             next: (event: ClaudeStreamEvent) => {
               this.logger.debug(`Sending SSE event: ${event.type}`);
+
+              // Capture Claude session ID for conversation continuity
+              if (event.type === "init" && event.sessionId) {
+                newClaudeSessionId = event.sessionId;
+                this.logger.log(`New Claude session ID: ${newClaudeSessionId}`);
+              }
 
               // Update active session state
               const session = this.activeSessions.get(projectId);
@@ -164,6 +184,15 @@ export class ChatService {
               // Clean up active session
               this.activeSessions.delete(projectId);
 
+              // Save Claude session ID for conversation continuity
+              if (newClaudeSessionId) {
+                await this.prisma.project.update({
+                  where: { id: projectId },
+                  data: { claudeSessionId: newClaudeSessionId },
+                });
+                this.logger.log(`Saved Claude session ID for project ${projectId}`);
+              }
+
               // Save assistant message with tool activities
               if (fullResponse || toolActivities.length > 0) {
                 const assistantMessage = await this.prisma.message.create({
@@ -207,5 +236,43 @@ export class ChatService {
 
   stopChat(sessionId: string): boolean {
     return this.claudeCliService.stopSession(sessionId);
+  }
+
+  async resetSession(projectId: string): Promise<void> {
+    await this.prisma.project.update({
+      where: { id: projectId },
+      data: { claudeSessionId: null },
+    });
+    this.logger.log(`Session reset for project ${projectId}`);
+  }
+
+  private async buildContextFromHistory(
+    projectId: string,
+    maxMessages = 10
+  ): Promise<string> {
+    const messages = await this.prisma.message.findMany({
+      where: { projectId },
+      orderBy: { createdAt: "desc" },
+      take: maxMessages,
+    });
+
+    if (messages.length === 0) {
+      return "";
+    }
+
+    // Reverse to get chronological order
+    const chronological = messages.reverse();
+
+    const contextLines = chronological.map((msg) => {
+      const role = msg.role === "USER" ? "User" : "Assistant";
+      // Truncate long messages to avoid token limits
+      const content =
+        msg.content.length > 500
+          ? msg.content.substring(0, 500) + "..."
+          : msg.content;
+      return `${role}: ${content}`;
+    });
+
+    return `[Previous Conversation Context]\n${contextLines.join("\n\n")}\n\n[End of Context]\n\n`;
   }
 }

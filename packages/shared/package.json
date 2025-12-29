@@ -1,5 +1,5 @@
 {
-  "name": "@claudplit/shared",
+  "name": "@claudeship/shared",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

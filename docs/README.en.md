@@ -1,4 +1,4 @@
-# Claudplit
+# ClaudeShip
 
 > **AI-Powered Web Application Builder** — Build full-stack web apps using natural language, powered by Claude Code CLI
 
@@ -8,7 +8,7 @@
 
 ## Overview
 
-Claudplit is a Replit-style AI-powered development environment that enables you to create web applications through natural language conversations. Simply describe what you want to build, and watch as AI generates, modifies, and runs your code in real-time.
+ClaudeShip is a Replit-style AI-powered development environment that enables you to create web applications through natural language conversations. Simply describe what you want to build, and watch as AI generates, modifies, and runs your code in real-time.
 
 ### Key Features
 
@@ -16,8 +16,10 @@ Claudplit is a Replit-style AI-powered development environment that enables you 
 |---------|-------------|
 | **Natural Language Development** | Describe your app in plain language — AI handles the code |
 | **Real-time Preview** | See your changes instantly with integrated dev server |
+| **Conversation Context** | AI remembers previous conversations for continuous development |
 | **Full-Stack Support** | Choose between Express (Node.js) or FastAPI (Python) backends |
 | **File Explorer** | Browse your project structure with a read-only tree view |
+| **File Viewer** | View code files with GitHub-style syntax highlighting |
 | **Live Progress** | Watch AI operations in real-time (file reads/writes, commands) |
 | **Multi-Project Support** | Run up to 99 projects simultaneously with dynamic port allocation |
 | **i18n Support** | English and Korean UI support |
@@ -26,7 +28,7 @@ Claudplit is a Replit-style AI-powered development environment that enables you 
 
 ## Project Types
 
-Claudplit supports two project configurations:
+ClaudeShip supports two project configurations:
 
 ### Frontend Only (Default)
 - **Stack**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
@@ -65,7 +67,7 @@ Both options include:
 
 ### Monorepo Structure
 ```
-claudplit/
+claudeship/
 ├── apps/
 │   ├── web/              # Next.js frontend
 │   └── server/           # NestJS backend API
@@ -90,14 +92,14 @@ claudplit/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/claudplit.git
-cd claudplit
+git clone https://github.com/your-username/claudeship.git
+cd claudeship
 
 # Install dependencies
 pnpm install
 
 # Run database migrations
-pnpm --filter @claudplit/server prisma:migrate
+pnpm --filter @claudeship/server prisma:migrate
 ```
 
 ---

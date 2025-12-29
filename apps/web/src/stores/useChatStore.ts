@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
-import { Role, type ChatMessage, type StreamEvent } from "@claudplit/shared";
+import { Role, type ChatMessage, type StreamEvent } from "@claudeship/shared";
 
 export interface StreamingBlock {
   id: string;

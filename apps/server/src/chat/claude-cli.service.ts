@@ -31,7 +31,8 @@ export class ClaudeCliService {
   executePrompt(
     projectPath: string,
     prompt: string,
-    sessionId: string
+    sessionId: string,
+    resumeSessionId?: string
   ): Observable<ClaudeStreamEvent> {
     return new Observable((subscriber) => {
       // Check if project path exists
@@ -52,11 +53,15 @@ export class ClaudeCliService {
       const tempFile = path.join(os.tmpdir(), `claude-prompt-${sessionId}.txt`);
       fs.writeFileSync(tempFile, prompt, "utf-8");
 
-      // Use script for PTY emulation with prompt file
-      const cliCommand = `${this.cliPath} -p "$(cat '${tempFile}')" --output-format stream-json --verbose --dangerously-skip-permissions`;
+      // Build CLI command with optional resume flag
+      const resumeFlag = resumeSessionId ? `--resume "${resumeSessionId}"` : "";
+      const cliCommand = `${this.cliPath} -p "$(cat '${tempFile}')" ${resumeFlag} --output-format stream-json --verbose --dangerously-skip-permissions`;
       const command = `script -q -c '${cliCommand}' /dev/null`;
 
       this.logger.log(`Using temp file: ${tempFile}`);
+      if (resumeSessionId) {
+        this.logger.log(`Resuming session: ${resumeSessionId}`);
+      }
 
       const proc = spawn("sh", ["-c", command], {
         cwd: projectPath,

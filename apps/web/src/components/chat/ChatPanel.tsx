@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MessageList } from "./MessageList";
 import { MessageInput } from "./MessageInput";
 import { useChatStore } from "@/stores/useChatStore";
+import { Button } from "@/components/ui/button";
+import { RotateCcw, MessageSquarePlus } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+import { api } from "@/lib/api";
 
 interface ChatPanelProps {
   projectId: string;
 }
 
 export function ChatPanel({ projectId }: ChatPanelProps) {
+  const { t } = useTranslation();
+  const [isResetting, setIsResetting] = useState(false);
   const {
     messages,
     isStreaming,
@@ -34,8 +40,38 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
     sendMessage(projectId, content);
   };
 
+  const handleResetSession = async () => {
+    if (isResetting || isStreaming) return;
+
+    setIsResetting(true);
+    try {
+      await api.post(`/projects/${projectId}/chat/reset`);
+      // Optionally refresh messages or show a toast
+    } catch (error) {
+      console.error("Failed to reset session:", error);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="flex h-full flex-col">
+      {/* Chat Header */}
+      <div className="flex items-center justify-between border-b px-4 py-2">
+        <span className="text-sm font-medium">{t("chat.title")}</span>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleResetSession}
+          disabled={isResetting || isStreaming}
+          title={t("chat.newConversation")}
+          className="h-8 gap-1.5"
+        >
+          <MessageSquarePlus className="h-4 w-4" />
+          <span className="hidden sm:inline">{t("chat.newConversation")}</span>
+        </Button>
+      </div>
+
       <MessageList
         messages={messages}
         streamingBlocks={streamingBlocks}

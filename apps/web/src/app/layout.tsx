@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "claudplit",
+  title: "ClaudeShip",
   description: "AI-Powered App Builder using Claude Code",
 };
 

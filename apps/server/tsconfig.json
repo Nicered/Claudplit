@@ -19,7 +19,7 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": ["src/*"],
-      "@claudplit/shared": ["../../packages/shared/src"]
+      "@claudeship/shared": ["../../packages/shared/src"]
     }
   },
   "include": ["src/**/*"],

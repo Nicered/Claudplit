@@ -14,6 +14,7 @@ model Project {
   backendFramework BackendFramework @default(NONE)
   path             String
   description      String?
+  claudeSessionId  String?          // Claude Code CLI session ID for conversation continuity
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
 

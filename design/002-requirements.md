@@ -1,4 +1,4 @@
-# claudplit 요구사항 정의서
+# ClaudeShip 요구사항 정의서
 
 > 작성일: 2025-12-29
 > 버전: 1.0
@@ -11,7 +11,7 @@
 
 | 항목 | 내용 |
 |------|------|
-| **프로젝트명** | claudplit (Claude + Replit) |
+| **프로젝트명** | ClaudeShip |
 | **핵심 목표** | Replit 대체재 - 로컬/클라우드 서버에서 실행 |
 | **비용 구조** | Claude Code 구독만으로 사용 (추가 API 비용 없음) |
 | **핵심 가치** | 빠른 피드백 루프 (코드 작성 → 프리뷰 확인) |
@@ -25,7 +25,7 @@
 
 ### 1.3 Claudable과의 차별점
 
-| 영역 | Claudable | claudplit |
+| 영역 | Claudable | ClaudeShip |
 |------|-----------|-----------|
 | **AI 연동** | Claude Agent SDK | Claude Code CLI |
 | **인증** | API 키 필요 가능 | 구독만으로 OK |
@@ -106,7 +106,7 @@ flowchart LR
 ### 4.3 모노레포 구조
 
 ```
-claudplit/
+ClaudeShip/
 ├── apps/
 │   ├── web/          # Next.js 프론트엔드
 │   └── server/       # NestJS 백엔드

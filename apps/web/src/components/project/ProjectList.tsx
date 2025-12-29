@@ -2,7 +2,7 @@
 
 import { ProjectCard } from "./ProjectCard";
 import { CreateProjectCard } from "./CreateProjectCard";
-import type { ProjectListItem } from "@claudplit/shared";
+import type { ProjectListItem } from "@claudeship/shared";
 
 interface ProjectListProps {
   projects: ProjectListItem[];

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
-import type { PreviewStatus, PreviewStatusType } from "@claudplit/shared";
+import type { PreviewStatus, PreviewStatusType } from "@claudeship/shared";
 
 interface ProjectReadyStatus {
   ready: boolean;

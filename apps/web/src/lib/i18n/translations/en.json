@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Claudplit",
+    "appName": "ClaudeShip",
     "loading": "Loading...",
     "error": "Error",
     "save": "Save",
@@ -37,11 +37,13 @@
     "updated": "Updated"
   },
   "chat": {
+    "title": "Chat",
     "placeholder": "Describe what you want to build...",
     "send": "Send",
     "thinking": "AI is thinking...",
     "toolRunning": "Running",
-    "toolCompleted": "Completed"
+    "toolCompleted": "Completed",
+    "newConversation": "New Chat"
   },
   "preview": {
     "title": "Preview",
@@ -56,7 +58,9 @@
     "title": "Files",
     "empty": "No files yet",
     "loading": "Loading files...",
-    "error": "Failed to load files"
+    "error": "Failed to load files",
+    "open": "Open File Explorer",
+    "close": "Close File Explorer"
   },
   "language": {
     "select": "Language",

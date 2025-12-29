@@ -1,7 +1,7 @@
 # 유사 오픈소스 프로젝트 리서치
 
 > 작성일: 2025-12-29
-> 목적: claudplit과 유사한 기능을 제공하는 기존 오픈소스 프로젝트 조사
+> 목적: ClaudeShip과 유사한 기능을 제공하는 기존 오픈소스 프로젝트 조사
 
 ## 프로젝트 목표 요약
 
@@ -54,8 +54,8 @@ flowchart LR
 - Qwen Code
 - Gemini CLI
 
-**claudplit과의 비교:**
-| 기능 | Claudable | claudplit 목표 |
+**ClaudeShip과의 비교:**
+| 기능 | Claudable | ClaudeShip 목표 |
 |------|-----------|---------------|
 | 라이브 프리뷰 | ✅ | ✅ |
 | Claude Code 연동 | ✅ | ✅ |
@@ -89,8 +89,8 @@ flowchart LR
 npx @siteboon/claude-code-ui
 ```
 
-**claudplit과의 비교:**
-| 기능 | Claude Code UI | claudplit 목표 |
+**ClaudeShip과의 비교:**
+| 기능 | Claude Code UI | ClaudeShip 목표 |
 |------|---------------|---------------|
 | 라이브 프리뷰 | ❌ | ✅ |
 | 파일 편집 | ✅ | ✅ |
@@ -117,8 +117,8 @@ npx @siteboon/claude-code-ui
 - 계획 모드 전환
 - 다크/라이트 테마
 
-**claudplit과의 비교:**
-| 기능 | claude-code-webui | claudplit 목표 |
+**ClaudeShip과의 비교:**
+| 기능 | claude-code-webui | ClaudeShip 목표 |
 |------|------------------|---------------|
 | 라이브 프리뷰 | ❌ | ✅ |
 | 채팅 인터페이스 | ✅ | ✅ |
@@ -150,8 +150,8 @@ npm install -g @sunpix/claude-code-web
 claude-code-web
 ```
 
-**claudplit과의 비교:**
-| 기능 | claude-code-web | claudplit 목표 |
+**ClaudeShip과의 비교:**
+| 기능 | claude-code-web | ClaudeShip 목표 |
 |------|----------------|---------------|
 | 라이브 프리뷰 | ❌ | ✅ |
 | 음성 입력 | ✅ | ❌ |
@@ -180,8 +180,8 @@ claude-code-web
 - 타임라인/체크포인트
 - CLAUDE.md 편집기
 
-**claudplit과의 비교:**
-| 기능 | Opcode | claudplit 목표 |
+**ClaudeShip과의 비교:**
+| 기능 | Opcode | ClaudeShip 목표 |
 |------|--------|---------------|
 | 라이브 프리뷰 | ❌ | ✅ |
 | 세션 관리 | ✅ | △ |
@@ -197,7 +197,7 @@ quadrantChart
     title 기존 프로젝트 포지셔닝
     x-axis 채팅 중심 --> 개발 환경 중심
     y-axis 관리 도구 --> 빌더 도구
-    quadrant-1 claudplit 목표
+    quadrant-1 ClaudeShip 목표
     quadrant-2 웹 빌더
     quadrant-3 채팅 UI
     quadrant-4 관리 도구
@@ -206,7 +206,7 @@ quadrantChart
     "claude-code-webui": [0.3, 0.3]
     "claude-code-web": [0.25, 0.35]
     Opcode: [0.7, 0.2]
-    claudplit: [0.75, 0.9]
+    ClaudeShip: [0.75, 0.9]
 ```
 
 | 프로젝트 | 라이브 프리뷰 | 웹 기반 | 로컬 실행 | Claude Code 전용 | 라이선스 |
@@ -223,7 +223,7 @@ quadrantChart
 
 ### Claudable이 가장 유사함
 
-Claudable은 claudplit이 목표로 하는 기능의 대부분을 이미 구현:
+Claudable은 ClaudeShip이 목표로 하는 기능의 대부분을 이미 구현:
 - 자연어 → 코드 생성
 - 라이브 프리뷰 (핫 리로드)
 - 로컬 실행
@@ -248,9 +248,9 @@ Claudable은 claudplit이 목표로 하는 기능의 대부분을 이미 구현:
 
 ### 차별화 가능 영역
 
-만약 claudplit을 별도로 개발한다면, 다음 영역에서 차별화 가능:
+만약 ClaudeShip을 별도로 개발한다면, 다음 영역에서 차별화 가능:
 
-| 영역 | Claudable | claudplit 차별화 포인트 |
+| 영역 | Claudable | ClaudeShip 차별화 포인트 |
 |------|-----------|----------------------|
 | **에이전트** | 다중 에이전트 지원 | Claude Code 전용 (심플) |
 | **배포** | Vercel 통합 | 배포 없음 (순수 개발용) |
@@ -275,7 +275,7 @@ Claudable이 이미 목표 기능을 제공하므로, 직접 사용하는 것을
 - 다중 에이전트 지원으로 복잡도 높음
 - 배포 기능 등 불필요한 기능 포함
 
-### 옵션 2: claudplit 신규 개발
+### 옵션 2: ClaudeShip 신규 개발
 
 더 심플하고 Claude Code에 특화된 도구 개발
 

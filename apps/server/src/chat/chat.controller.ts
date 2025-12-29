@@ -51,4 +51,10 @@ export class ChatController {
   ): Observable<MessageEvent> {
     return this.chatService.sendMessage(projectId, dto.content);
   }
+
+  @Post("chat/reset")
+  async resetSession(@Param("projectId") projectId: string) {
+    await this.chatService.resetSession(projectId);
+    return { success: true, message: "Session reset successfully" };
+  }
 }

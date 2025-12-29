@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { ProjectList } from "@/components/project/ProjectList";
 import { CreateProjectModal } from "@/components/project/CreateProjectModal";
 import { useProjectStore } from "@/stores/useProjectStore";
-import type { ProjectType } from "@claudplit/shared";
+import type { ProjectType } from "@claudeship/shared";
 
 export default function Home() {
   const router = useRouter();

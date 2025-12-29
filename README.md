@@ -1,4 +1,4 @@
-# Claudplit
+# ClaudeShip
 
 > **AI-Powered Web Application Builder** — Build full-stack web apps using natural language, powered by Claude Code CLI
 
@@ -23,8 +23,8 @@
 
 ```bash
 # Clone & Install
-git clone https://github.com/your-username/claudplit.git
-cd claudplit && pnpm install
+git clone https://github.com/your-username/claudeship.git
+cd claudeship && pnpm install
 
 # Run
 pnpm dev
@@ -38,7 +38,7 @@ Open `http://localhost:13000` and start building!
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Claudplit                                │
+│                         ClaudeShip                                │
 ├─────────────────────────────────────────────────────────────────┤
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐       │
 │  │   Next.js    │    │    NestJS    │    │ Claude Code  │       │

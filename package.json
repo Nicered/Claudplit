@@ -1,5 +1,5 @@
 {
-  "name": "claudplit",
+  "name": "claudeship",
   "version": "0.1.0",
   "private": true,
   "description": "AI-Powered App Builder using Claude Code CLI",
@@ -7,11 +7,11 @@
     "prepare": "bash scripts/setup-hooks.sh || true",
     "dev": "node scripts/dev.js",
     "dev:parallel": "pnpm run --parallel dev",
-    "dev:web": "pnpm --filter @claudplit/web dev",
-    "dev:server": "pnpm --filter @claudplit/server dev",
+    "dev:web": "pnpm --filter @claudeship/web dev",
+    "dev:server": "pnpm --filter @claudeship/server dev",
     "build": "pnpm run --parallel build",
-    "build:web": "pnpm --filter @claudplit/web build",
-    "build:server": "pnpm --filter @claudplit/server build",
+    "build:web": "pnpm --filter @claudeship/web build",
+    "build:server": "pnpm --filter @claudeship/server build",
     "lint": "pnpm run --parallel lint",
     "type-check": "pnpm run --parallel type-check",
     "clean": "pnpm run --parallel clean"

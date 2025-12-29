@@ -1,5 +1,5 @@
 {
-  "name": "@claudplit/server",
+  "name": "@claudeship/server",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -16,7 +16,7 @@
     "prisma:studio": "prisma studio"
   },
   "dependencies": {
-    "@claudplit/shared": "workspace:*",
+    "@claudeship/shared": "workspace:*",
     "@nestjs/common": "^10.4.0",
     "@nestjs/core": "^10.4.0",
     "@nestjs/config": "^3.3.0",

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { MessageItem } from "./MessageItem";
 import { StreamingMessage } from "./StreamingMessage";
-import type { ChatMessage } from "@claudplit/shared";
+import type { ChatMessage } from "@claudeship/shared";
 import type { StreamingBlock } from "@/stores/useChatStore";
 
 interface MessageListProps {

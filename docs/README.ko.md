@@ -1,4 +1,4 @@
-# Claudplit
+# ClaudeShip
 
 > **AI 기반 웹 애플리케이션 빌더** — Claude Code CLI를 활용한 자연어 풀스택 앱 개발
 
@@ -8,7 +8,7 @@
 
 ## 개요
 
-Claudplit은 자연어 대화를 통해 웹 애플리케이션을 생성할 수 있는 Replit 스타일의 AI 기반 개발 환경입니다. 만들고 싶은 것을 설명하기만 하면, AI가 실시간으로 코드를 생성하고 수정하며 실행합니다.
+ClaudeShip은 자연어 대화를 통해 웹 애플리케이션을 생성할 수 있는 Replit 스타일의 AI 기반 개발 환경입니다. 만들고 싶은 것을 설명하기만 하면, AI가 실시간으로 코드를 생성하고 수정하며 실행합니다.
 
 ### 주요 기능
 
@@ -16,8 +16,10 @@ Claudplit은 자연어 대화를 통해 웹 애플리케이션을 생성할 수 
 |------|------|
 | **자연어 개발** | 일상 언어로 앱을 설명하면 AI가 코드를 작성 |
 | **실시간 프리뷰** | 통합 개발 서버로 변경사항을 즉시 확인 |
+| **대화 맥락 유지** | 이전 대화 내용을 기억하여 연속적인 개발 가능 |
 | **풀스택 지원** | Express (Node.js) 또는 FastAPI (Python) 백엔드 선택 |
 | **파일 탐색기** | 읽기 전용 트리 뷰로 프로젝트 구조 탐색 |
+| **파일 뷰어** | GitHub 스타일 구문 강조로 코드 파일 확인 |
 | **실시간 진행상황** | AI 작업 과정을 실시간으로 확인 (파일 읽기/쓰기, 명령어 실행) |
 | **다중 프로젝트 지원** | 동적 포트 할당으로 최대 99개 프로젝트 동시 실행 |
 | **다국어 지원** | 영어/한국어 UI 지원 |
@@ -26,7 +28,7 @@ Claudplit은 자연어 대화를 통해 웹 애플리케이션을 생성할 수 
 
 ## 프로젝트 유형
 
-Claudplit은 두 가지 프로젝트 구성을 지원합니다:
+ClaudeShip은 두 가지 프로젝트 구성을 지원합니다:
 
 ### 프론트엔드 전용 (기본)
 - **스택**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
@@ -65,7 +67,7 @@ Claudplit은 두 가지 프로젝트 구성을 지원합니다:
 
 ### 모노레포 구조
 ```
-claudplit/
+claudeship/
 ├── apps/
 │   ├── web/              # Next.js 프론트엔드
 │   └── server/           # NestJS 백엔드 API
@@ -90,14 +92,14 @@ claudplit/
 
 ```bash
 # 저장소 클론
-git clone https://github.com/your-username/claudplit.git
-cd claudplit
+git clone https://github.com/your-username/claudeship.git
+cd claudeship
 
 # 의존성 설치
 pnpm install
 
 # 데이터베이스 마이그레이션 실행
-pnpm --filter @claudplit/server prisma:migrate
+pnpm --filter @claudeship/server prisma:migrate
 ```
 
 ---

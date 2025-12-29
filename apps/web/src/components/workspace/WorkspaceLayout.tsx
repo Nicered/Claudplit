@@ -4,15 +4,34 @@ import { useState } from "react";
 import { ChatPanel } from "@/components/chat/ChatPanel";
 import { PreviewPanel } from "@/components/preview/PreviewPanel";
 import { FileExplorer } from "@/components/file/FileExplorer";
+import { FileViewer } from "@/components/file/FileViewer";
 import { FolderTree, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 interface WorkspaceLayoutProps {
   projectId: string;
 }
 
+interface SelectedFile {
+  path: string;
+  content: string;
+  extension: string;
+}
+
 export function WorkspaceLayout({ projectId }: WorkspaceLayoutProps) {
+  const { t } = useTranslation();
   const [showFileExplorer, setShowFileExplorer] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
+
+  const handleFileSelect = (path: string, content: string) => {
+    const extension = path.split(".").pop() || "";
+    setSelectedFile({ path, content, extension });
+  };
+
+  const handleCloseViewer = () => {
+    setSelectedFile(null);
+  };
 
   return (
     <div className="flex h-[calc(100vh-3.5rem)]">
@@ -22,7 +41,7 @@ export function WorkspaceLayout({ projectId }: WorkspaceLayoutProps) {
         size="icon"
         onClick={() => setShowFileExplorer(!showFileExplorer)}
         className="absolute left-4 top-16 z-10 h-8 w-8 bg-background shadow-sm border"
-        title={showFileExplorer ? "파일 탐색기 닫기" : "파일 탐색기 열기"}
+        title={showFileExplorer ? t("fileExplorer.close") : t("fileExplorer.open")}
       >
         {showFileExplorer ? (
           <X className="h-4 w-4" />
@@ -34,7 +53,7 @@ export function WorkspaceLayout({ projectId }: WorkspaceLayoutProps) {
       {/* File Explorer Panel */}
       {showFileExplorer && (
         <div className="w-64 border-r bg-muted/30 flex-shrink-0">
-          <FileExplorer projectId={projectId} />
+          <FileExplorer projectId={projectId} onFileSelect={handleFileSelect} />
         </div>
       )}
 
@@ -53,6 +72,16 @@ export function WorkspaceLayout({ projectId }: WorkspaceLayoutProps) {
       >
         <PreviewPanel projectId={projectId} />
       </div>
+
+      {/* File Viewer Modal */}
+      {selectedFile && (
+        <FileViewer
+          path={selectedFile.path}
+          content={selectedFile.content}
+          language={selectedFile.extension}
+          onClose={handleCloseViewer}
+        />
+      )}
     </div>
   );
 }

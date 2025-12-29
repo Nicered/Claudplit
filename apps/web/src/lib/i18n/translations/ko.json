@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Claudplit",
+    "appName": "ClaudeShip",
     "loading": "로딩 중...",
     "error": "오류",
     "save": "저장",
@@ -37,11 +37,13 @@
     "updated": "업데이트"
   },
   "chat": {
+    "title": "채팅",
     "placeholder": "만들고 싶은 것을 설명하세요...",
     "send": "전송",
     "thinking": "AI가 생각 중...",
     "toolRunning": "실행 중",
-    "toolCompleted": "완료"
+    "toolCompleted": "완료",
+    "newConversation": "새 대화"
   },
   "preview": {
     "title": "미리보기",
@@ -56,7 +58,9 @@
     "title": "파일",
     "empty": "파일이 없습니다",
     "loading": "파일 로딩 중...",
-    "error": "파일 로드 실패"
+    "error": "파일 로드 실패",
+    "open": "파일 탐색기 열기",
+    "close": "파일 탐색기 닫기"
   },
   "language": {
     "select": "언어",

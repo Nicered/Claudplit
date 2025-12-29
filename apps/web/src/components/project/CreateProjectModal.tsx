@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ProjectType, BackendFramework } from "@claudplit/shared";
+import { ProjectType, BackendFramework } from "@claudeship/shared";
 import { useTranslation } from "@/lib/i18n";
 
 interface CreateProjectModalProps {

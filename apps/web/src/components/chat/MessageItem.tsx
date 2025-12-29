@@ -3,7 +3,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
-import type { ChatMessage, Role } from "@claudplit/shared";
+import type { ChatMessage, Role } from "@claudeship/shared";
 import {
   FileText,
   FolderSearch,

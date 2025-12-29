@@ -15,7 +15,7 @@ export class ProjectService {
   ) {
     this.projectsBasePath =
       this.configService.get<string>("PROJECTS_BASE_PATH") ||
-      path.join(process.env.HOME || "/tmp", "claudplit-projects");
+      path.join(process.env.HOME || "/tmp", "claudeship-projects");
   }
 
   async findAll() {

@@ -71,7 +71,7 @@ async function main() {
   const webPort = await findAvailablePort(serverPort === 13000 ? 13001 : 13000);
 
   console.log("╔════════════════════════════════════════════════════════════╗");
-  console.log("║                    Claudplit Dev Server                    ║");
+  console.log("║                   ClaudeShip Dev Server                    ║");
   console.log("╠════════════════════════════════════════════════════════════╣");
   console.log(`║  API Server:  http://localhost:${serverPort}                       ║`);
   console.log(`║  Web App:     http://localhost:${webPort}                        ║`);
@@ -83,7 +83,7 @@ async function main() {
   const serverProc = startProcess(
     "server",
     "pnpm",
-    ["--filter", "@claudplit/server", "dev"],
+    ["--filter", "@claudeship/server", "dev"],
     {
       PORT: String(serverPort),
       CORS_ORIGIN: `http://localhost:${webPort}`,
@@ -98,7 +98,7 @@ async function main() {
   const webProc = startProcess(
     "web",
     "pnpm",
-    ["--filter", "@claudplit/web", "dev"],
+    ["--filter", "@claudeship/web", "dev"],
     {
       PORT: String(webPort),
       NEXT_PUBLIC_API_URL: apiUrl,

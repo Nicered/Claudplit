@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
-import type { Project, ProjectListItem, CreateProjectInput } from "@claudplit/shared";
+import type { Project, ProjectListItem, CreateProjectInput } from "@claudeship/shared";
 
 interface ProjectState {
   projects: ProjectListItem[];

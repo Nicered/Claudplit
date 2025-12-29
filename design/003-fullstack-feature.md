@@ -7,7 +7,7 @@
 
 ## 1. 개요
 
-claudplit에 Replit 스타일의 풀스택 앱 생성 기능을 추가합니다.
+ClaudeShip에 풀스택 앱 생성 기능을 추가합니다.
 
 ### 1.1 주요 기능
 
@@ -172,7 +172,7 @@ model Project {
   "name": "my-app",
   "projectType": "WEB",
   "backendFramework": "EXPRESS",
-  "path": "/home/user/claudplit-projects/my-app"
+  "path": "/home/user/ClaudeShip-projects/my-app"
 }
 ```
 

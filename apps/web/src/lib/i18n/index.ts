@@ -26,7 +26,7 @@ export const useLocaleStore = create<LocaleState>()(
       setLocale: (locale) => set({ locale }),
     }),
     {
-      name: "claudplit-locale",
+      name: "claudeship-locale",
     }
   )
 );
