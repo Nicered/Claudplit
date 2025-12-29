@@ -1,0 +1,33 @@
+{
+  "name": "claudplit",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-Powered App Builder using Claude Code CLI",
+  "scripts": {
+    "prepare": "bash scripts/setup-hooks.sh || true",
+    "dev": "pnpm run --parallel dev",
+    "dev:web": "pnpm --filter @claudplit/web dev",
+    "dev:server": "pnpm --filter @claudplit/server dev",
+    "build": "pnpm run --parallel build",
+    "build:web": "pnpm --filter @claudplit/web build",
+    "build:server": "pnpm --filter @claudplit/server build",
+    "lint": "pnpm run --parallel lint",
+    "type-check": "pnpm run --parallel type-check",
+    "clean": "pnpm run --parallel clean"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "claude-code",
+    "app-builder",
+    "nextjs",
+    "nestjs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id          String      @id @default(uuid())
+  name        String
+  projectType ProjectType
+  path        String
+  description String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  messages Message[]
+
+  @@map("projects")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  projectId String
+  role      Role
+  content   String
+  metadata  String?
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+enum ProjectType {
+  WEB
+  NATIVE
+}
+
+enum Role {
+  USER
+  ASSISTANT
+  SYSTEM
+}

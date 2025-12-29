@@ -1,0 +1,60 @@
+#!/bin/bash
+
+# Commit message validation hook
+# Rules:
+# 1. Format: [TYPE] 제목
+# 2. No Claude signature
+# 3. Maximum 4 bullet points
+
+COMMIT_MSG_FILE=$1
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Remove Claude signature if present
+CLEANED_MSG=$(echo "$COMMIT_MSG" | sed '/^🤖 Generated with \[Claude Code\]/d' | sed '/^Co-Authored-By: Claude/d' | sed '/^$/N;/^\n$/d')
+
+# Save cleaned message
+echo "$CLEANED_MSG" > "$COMMIT_MSG_FILE"
+COMMIT_MSG="$CLEANED_MSG"
+
+# Get the first line (title)
+TITLE=$(echo "$COMMIT_MSG" | head -n 1)
+
+# Allowed types
+ALLOWED_TYPES="FEAT|FIX|DOCS|STYLE|REFACTOR|TEST|CHORE|PERF|CI|BUILD"
+
+# Check format: [TYPE] 제목
+if ! echo "$TITLE" | grep -qE "^\[($ALLOWED_TYPES)\] .+"; then
+    echo ""
+    echo "❌ 커밋 메시지 형식 오류"
+    echo ""
+    echo "올바른 형식: [TYPE] 제목"
+    echo ""
+    echo "허용되는 TYPE:"
+    echo "  FEAT     - 새로운 기능"
+    echo "  FIX      - 버그 수정"
+    echo "  DOCS     - 문서 변경"
+    echo "  STYLE    - 코드 포맷팅"
+    echo "  REFACTOR - 리팩토링"
+    echo "  TEST     - 테스트"
+    echo "  CHORE    - 기타 작업"
+    echo "  PERF     - 성능 개선"
+    echo "  CI       - CI/CD"
+    echo "  BUILD    - 빌드 설정"
+    echo ""
+    echo "예시: [FEAT] 사용자 인증 기능 추가"
+    echo ""
+    exit 1
+fi
+
+# Count bullet points (lines starting with -)
+BULLET_COUNT=$(echo "$COMMIT_MSG" | grep -c "^- ")
+
+if [ "$BULLET_COUNT" -gt 4 ]; then
+    echo ""
+    echo "❌ 커밋 메시지 오류: 불릿 포인트는 최대 4개까지 허용됩니다."
+    echo "   현재: ${BULLET_COUNT}개"
+    echo ""
+    exit 1
+fi
+
+exit 0
