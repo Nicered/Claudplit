@@ -6,10 +6,12 @@ import { Header } from "@/components/layout/Header";
 import { ProjectList } from "@/components/project/ProjectList";
 import { CreateProjectModal } from "@/components/project/CreateProjectModal";
 import { useProjectStore } from "@/stores/useProjectStore";
+import { useTranslation } from "@/lib/i18n";
 import type { ProjectType } from "@claudeship/shared";
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { projects, isLoading, fetchProjects, createProject, deleteProject } =
     useProjectStore();
@@ -32,7 +34,7 @@ export default function Home() {
   };
 
   const handleDeleteProject = async (id: string) => {
-    if (confirm("정말 이 프로젝트를 삭제하시겠습니까?")) {
+    if (confirm(t("project.deleteConfirm"))) {
       try {
         await deleteProject(id);
       } catch (error) {
@@ -45,13 +47,16 @@ export default function Home() {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">내 프로젝트</h2>
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold">{t("home.title")}</h2>
+          <p className="mt-1 text-muted-foreground">
+            {projects.length === 0 ? t("home.createFirst") : `${projects.length} ${projects.length === 1 ? "project" : "projects"}`}
+          </p>
         </div>
 
         {isLoading && projects.length === 0 ? (
           <div className="flex h-40 items-center justify-center text-muted-foreground">
-            로딩 중...
+            {t("common.loading")}
           </div>
         ) : (
           <ProjectList

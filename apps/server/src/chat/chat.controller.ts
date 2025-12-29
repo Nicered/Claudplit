@@ -43,6 +43,14 @@ export class ChatController {
     };
   }
 
+  @Get("chat/subscribe")
+  @Sse()
+  subscribeToSession(
+    @Param("projectId") projectId: string
+  ): Observable<MessageEvent> {
+    return this.chatService.subscribeToSession(projectId);
+  }
+
   @Post("chat")
   @Sse()
   sendMessage(

@@ -20,12 +20,14 @@ export interface ActiveSessionState {
   toolInput: Record<string, unknown> | null;
   streamingContent: string;
   startedAt: number;
+  eventHistory: ClaudeStreamEvent[];
 }
 
 @Injectable()
 export class ChatService {
   private readonly logger = new Logger(ChatService.name);
   private activeSessions: Map<string, ActiveSessionState> = new Map();
+  private eventSubjects: Map<string, Subject<MessageEvent>> = new Map();
 
   constructor(
     private prisma: PrismaService,
@@ -46,6 +48,54 @@ export class ChatService {
     return this.activeSessions.get(projectId) || null;
   }
 
+  /**
+   * Subscribe to an ongoing chat session's events.
+   * Used when a client reconnects to receive updates.
+   */
+  subscribeToSession(projectId: string): Observable<MessageEvent> {
+    const session = this.activeSessions.get(projectId);
+
+    if (!session || !session.isStreaming) {
+      // No active session, return empty observable that completes immediately
+      return new Observable((subscriber) => {
+        subscriber.next({
+          data: JSON.stringify({ type: "no_active_session" }),
+        } as MessageEvent);
+        subscriber.complete();
+      });
+    }
+
+    // Get or create subject for this project
+    let subject = this.eventSubjects.get(projectId);
+    if (!subject) {
+      subject = new Subject<MessageEvent>();
+      this.eventSubjects.set(projectId, subject);
+    }
+
+    // Send event history first (replay past events)
+    return new Observable((subscriber) => {
+      this.logger.log(`Client subscribing to session for project ${projectId}, replaying ${session.eventHistory.length} events`);
+
+      // Replay event history
+      for (const event of session.eventHistory) {
+        subscriber.next({
+          data: JSON.stringify(event),
+        } as MessageEvent);
+      }
+
+      // Subscribe to future events
+      const subscription = subject!.subscribe({
+        next: (event) => subscriber.next(event),
+        error: (err) => subscriber.error(err),
+        complete: () => subscriber.complete(),
+      });
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    });
+  }
+
   sendMessage(
     projectId: string,
     content: string
@@ -61,7 +111,22 @@ export class ChatService {
       toolInput: null,
       streamingContent: "",
       startedAt: Date.now(),
+      eventHistory: [],
     });
+
+    // Create subject for broadcasting events to multiple subscribers
+    const subject = new Subject<MessageEvent>();
+    this.eventSubjects.set(projectId, subject);
+
+    // Helper to broadcast event to all subscribers and store in history
+    const broadcastEvent = (event: ClaudeStreamEvent) => {
+      const session = this.activeSessions.get(projectId);
+      if (session) {
+        session.eventHistory.push(event);
+      }
+      const messageEvent = { data: JSON.stringify(event) } as MessageEvent;
+      subject.next(messageEvent);
+    };
 
     return new Observable((subscriber) => {
       (async () => {
@@ -164,26 +229,34 @@ export class ChatService {
                 totalCost = event.cost;
               }
 
+              // Broadcast to all subscribers (including reconnected clients)
+              broadcastEvent(event);
+
+              // Also send to direct subscriber (original request)
               subscriber.next({
                 data: JSON.stringify(event),
               } as MessageEvent);
             },
             error: async (error) => {
               this.logger.error(`Claude CLI error: ${error.message}`);
+
+              const errorEvent = {
+                type: "error" as const,
+                error: error.message,
+              };
+              broadcastEvent(errorEvent);
+
+              // Clean up
               this.activeSessions.delete(projectId);
+              subject.complete();
+              this.eventSubjects.delete(projectId);
 
               subscriber.next({
-                data: JSON.stringify({
-                  type: "error",
-                  error: error.message,
-                }),
+                data: JSON.stringify(errorEvent),
               } as MessageEvent);
               subscriber.complete();
             },
             complete: async () => {
-              // Clean up active session
-              this.activeSessions.delete(projectId);
-
               // Save Claude session ID for conversation continuity
               if (newClaudeSessionId) {
                 await this.prisma.project.update({
@@ -207,13 +280,21 @@ export class ChatService {
                   },
                 });
 
+                const completeEvent = {
+                  type: "assistant_message",
+                  messageId: assistantMessage.id,
+                };
+                broadcastEvent(completeEvent as ClaudeStreamEvent);
+
                 subscriber.next({
-                  data: JSON.stringify({
-                    type: "assistant_message",
-                    messageId: assistantMessage.id,
-                  }),
+                  data: JSON.stringify(completeEvent),
                 } as MessageEvent);
               }
+
+              // Clean up
+              this.activeSessions.delete(projectId);
+              subject.complete();
+              this.eventSubjects.delete(projectId);
 
               subscriber.complete();
             },

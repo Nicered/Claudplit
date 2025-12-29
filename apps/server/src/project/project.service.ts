@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { ConfigService } from "@nestjs/config";
+import { randomUUID } from "crypto";
 import * as path from "path";
 import * as fs from "fs/promises";
 
@@ -44,7 +45,9 @@ export class ProjectService {
   }
 
   async create(dto: CreateProjectDto) {
-    const projectPath = path.join(this.projectsBasePath, dto.name);
+    // Use UUID for folder name to avoid issues with special characters
+    const folderId = randomUUID();
+    const projectPath = path.join(this.projectsBasePath, folderId);
 
     // Create project directory
     await fs.mkdir(projectPath, { recursive: true });

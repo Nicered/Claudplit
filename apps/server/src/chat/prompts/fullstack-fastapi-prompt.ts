@@ -324,24 +324,11 @@ DATABASE_URL=sqlite+aiosqlite:///./dev.db
 # PostgreSQL: postgresql+asyncpg://user:pass@localhost/dbname
 \`\`\`
 
-## Development Commands
+## Important: Server Execution
 
-### Start Backend
-\`\`\`bash
-cd backend
-source venv/bin/activate
-uvicorn app.main:app --reload --port 3001
-\`\`\`
-
-### Start Frontend
-\`\`\`bash
-cd frontend
-npm run dev
-\`\`\`
-
-- Frontend: http://localhost:3000
-- Backend: http://localhost:3001
-- API Docs: http://localhost:3001/docs (Swagger UI)
+**DO NOT run \`uvicorn\`, \`npm run dev\`, \`npm start\`, or any server-starting commands.**
+The preview system automatically handles starting both frontend and backend servers.
+Your job is to create/modify files and run \`pip install\` / \`npm install\` when needed - NOT to start servers.
 
 ## Checklist
 
@@ -357,6 +344,8 @@ npm run dev
 
 ## What NOT to Do
 
+- **NEVER run \`uvicorn\`, \`npm run dev\`, \`npm start\`, or any server-starting commands** - The preview system handles this
+- **NEVER run long-running processes or commands that don't terminate**
 - Never use Node.js or non-Python backend code
 - Never skip database model definition
 - Never hardcode API URLs (use environment variables)

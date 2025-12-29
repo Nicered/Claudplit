@@ -22,6 +22,7 @@
   },
   "project": {
     "create": "새 프로젝트",
+    "createDescription": "AI와 함께 만들기",
     "createTitle": "새 프로젝트 생성",
     "name": "프로젝트 이름",
     "namePlaceholder": "my-awesome-app",

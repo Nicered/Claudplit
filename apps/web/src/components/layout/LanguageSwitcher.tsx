@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslation, type Locale } from "@/lib/i18n";
-import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function LanguageSwitcher() {
@@ -15,13 +14,12 @@ export function LanguageSwitcher() {
   return (
     <Button
       variant="ghost"
-      size="sm"
+      size="icon"
       onClick={toggleLocale}
-      className="flex items-center gap-1.5"
+      className="h-9 w-9 text-xs font-medium"
       title={t("language.select")}
     >
-      <Globe className="h-4 w-4" />
-      <span className="text-sm">{locale === "en" ? "EN" : "KO"}</span>
+      {locale === "en" ? "EN" : "KO"}
     </Button>
   );
 }

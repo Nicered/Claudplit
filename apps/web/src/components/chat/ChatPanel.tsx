@@ -57,7 +57,7 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
   return (
     <div className="flex h-full flex-col">
       {/* Chat Header */}
-      <div className="flex items-center justify-between border-b px-4 py-2">
+      <div className="flex h-12 items-center justify-between border-b px-4">
         <span className="text-sm font-medium">{t("chat.title")}</span>
         <Button
           variant="ghost"
@@ -65,7 +65,7 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
           onClick={handleResetSession}
           disabled={isResetting || isStreaming}
           title={t("chat.newConversation")}
-          className="h-8 gap-1.5"
+          className="gap-1.5"
         >
           <MessageSquarePlus className="h-4 w-4" />
           <span className="hidden sm:inline">{t("chat.newConversation")}</span>

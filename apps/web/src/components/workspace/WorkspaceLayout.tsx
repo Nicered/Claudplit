@@ -37,10 +37,10 @@ export function WorkspaceLayout({ projectId }: WorkspaceLayoutProps) {
     <div className="flex h-[calc(100vh-3.5rem)]">
       {/* File Explorer Toggle Button */}
       <Button
-        variant="ghost"
-        size="icon"
+        variant="outline"
+        size="sm"
         onClick={() => setShowFileExplorer(!showFileExplorer)}
-        className="absolute left-4 top-16 z-10 h-8 w-8 bg-background shadow-sm border"
+        className="absolute left-4 top-16 z-10 h-8 w-8 p-0"
         title={showFileExplorer ? t("fileExplorer.close") : t("fileExplorer.open")}
       >
         {showFileExplorer ? (

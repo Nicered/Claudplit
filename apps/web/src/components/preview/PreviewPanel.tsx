@@ -73,7 +73,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
   return (
     <div className="flex h-full flex-col border-l">
       {/* Controls */}
-      <div className="flex items-center justify-between border-b px-4 py-2">
+      <div className="flex h-12 items-center justify-between border-b px-4">
         <div className="flex items-center gap-2">
           <div
             className={`h-2 w-2 rounded-full ${
@@ -106,24 +106,27 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
             <>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={handleRefresh}
                 disabled={isLoading}
+                className="h-8 w-8 p-0"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={handleOpenExternal}
+                className="h-8 w-8 p-0"
               >
                 <ExternalLink className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
-                size="icon"
+                size="sm"
                 onClick={handleStop}
                 disabled={isLoading}
+                className="h-8 w-8 p-0"
               >
                 <Square className="h-4 w-4" />
               </Button>
@@ -131,10 +134,11 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
           ) : (
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={handleStart}
               disabled={!isMounted || isLoading || status === "starting" || !projectReady.ready}
               title={!projectReady.ready ? t("preview.notReady") : t("preview.start")}
+              className="h-8 w-8 p-0"
             >
               <Play className="h-4 w-4" />
             </Button>

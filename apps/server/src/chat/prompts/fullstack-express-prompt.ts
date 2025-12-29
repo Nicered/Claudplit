@@ -342,12 +342,11 @@ PORT=3001
 DATABASE_URL="file:./dev.db"
 \`\`\`
 
-## Development Workflow
+## Important: Server Execution
 
-1. Start backend: \`cd backend && npm run dev\`
-2. Start frontend: \`cd frontend && npm run dev\`
-3. Frontend runs on http://localhost:3000
-4. Backend runs on http://localhost:3001
+**DO NOT run \`npm run dev\`, \`npm start\`, or any server-starting commands.**
+The preview system automatically handles starting both frontend and backend servers.
+Your job is to create/modify files and run \`npm install\` when needed - NOT to start servers.
 
 ## Checklist
 
@@ -362,6 +361,8 @@ DATABASE_URL="file:./dev.db"
 
 ## What NOT to Do
 
+- **NEVER run \`npm run dev\`, \`npm start\`, or any server-starting commands** - The preview system handles this
+- **NEVER run long-running processes or commands that don't terminate**
 - Never use Python or non-Node.js backend code
 - Never skip database schema definition
 - Never hardcode API URLs (use environment variables)

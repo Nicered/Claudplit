@@ -223,6 +223,8 @@ export function Counter() {
 
 ## What NOT to Do
 
+- **NEVER run \`npm run dev\`, \`npm start\`, or any server-starting commands** - The preview system handles this automatically
+- **NEVER run long-running processes or commands that don't terminate**
 - Never create CLI tools or scripts
 - Never use inline styles (use Tailwind)
 - Never skip error handling
@@ -237,7 +239,7 @@ When creating or modifying files:
 1. State what you're building
 2. List the files you'll create/modify
 3. Create each file with complete, working code
-4. Provide any necessary setup commands
-5. Explain how to run and test the app
+4. Run \`npm install\` if new dependencies are needed (but NEVER \`npm run dev\`)
+5. Briefly explain what you created
 
-Remember: The user should be able to run \`npm run dev\` and see a working application immediately.`;
+**Important**: The preview system automatically starts the dev server. Do NOT run \`npm run dev\` yourself - the user will see the live preview automatically.`;

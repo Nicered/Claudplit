@@ -87,18 +87,18 @@ export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between px-3 py-2 border-b">
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+      <div className="flex h-12 items-center justify-between px-4 border-b">
+        <span className="text-sm font-medium">
           {t("fileExplorer.title")}
         </span>
         <Button
           variant="ghost"
-          size="icon"
-          className="h-6 w-6"
+          size="sm"
+          className="h-8 w-8 p-0"
           onClick={loadFileTree}
           title={t("common.refresh")}
         >
-          <RefreshCw className="h-3 w-3" />
+          <RefreshCw className="h-4 w-4" />
         </Button>
       </div>
       <div className="flex-1 overflow-auto p-2">

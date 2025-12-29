@@ -67,31 +67,104 @@ export const useChatStore = create<ChatState>((set, get) => ({
       if (status.isStreaming) {
         // Only update if we're not already streaming locally (avoid overwriting local state)
         if (!currentState.isStreaming) {
-          // Recovering from page refresh - restore state from server
-          const blocks: StreamingBlock[] = [];
-          if (status.streamingContent) {
-            blocks.push({
-              id: "text-recovery",
-              type: "text",
-              content: status.streamingContent,
-            });
-          }
-          if (status.currentTool) {
-            blocks.push({
-              id: `tool-${Date.now()}`,
-              type: "tool_use",
-              tool: {
-                name: status.currentTool,
-                input: status.toolInput || undefined,
-              },
-              status: "running",
-            });
-          }
-
+          // Recovering from page refresh - connect to the subscribe endpoint to receive updates
           set({
             isStreaming: true,
-            streamingBlocks: blocks,
+            streamingBlocks: [],
           });
+
+          // Connect to SSE subscribe endpoint
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:14000/api"}/projects/${projectId}/chat/subscribe`
+          );
+
+          if (!response.ok) {
+            throw new Error("Failed to subscribe to session");
+          }
+
+          const reader = response.body?.getReader();
+          if (!reader) {
+            throw new Error("No response body");
+          }
+
+          const decoder = new TextDecoder();
+          let buffer = "";
+
+          const processStream = async () => {
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split("\n");
+                buffer = lines.pop() || "";
+
+                for (const line of lines) {
+                  if (line.startsWith("data: ")) {
+                    try {
+                      const data = JSON.parse(line.slice(6));
+                      console.log("[SSE Subscribe Event]", data.type, data);
+
+                      if (data.type === "no_active_session") {
+                        // No active session, just finish
+                        break;
+                      }
+
+                      if (data.type === "text" && data.content) {
+                        const textBlock: StreamingBlock = {
+                          id: `text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                          type: "text",
+                          content: data.content,
+                        };
+                        set((state) => ({
+                          streamingBlocks: [...state.streamingBlocks, textBlock],
+                        }));
+                      } else if (data.type === "tool_use" && data.tool) {
+                        const toolBlock: StreamingBlock = {
+                          id: `tool-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                          type: "tool_use",
+                          tool: {
+                            name: data.tool.name,
+                            input: data.tool.input,
+                          },
+                          status: "running",
+                        };
+                        set((state) => ({
+                          streamingBlocks: [...state.streamingBlocks, toolBlock],
+                        }));
+                      } else if (data.type === "tool_result") {
+                        set((state) => {
+                          const blocks = [...state.streamingBlocks];
+                          for (let i = blocks.length - 1; i >= 0; i--) {
+                            if (blocks[i].type === "tool_use" && blocks[i].status === "running") {
+                              blocks[i] = {
+                                ...blocks[i],
+                                status: "completed",
+                                result: data.content,
+                              };
+                              break;
+                            }
+                          }
+                          return { streamingBlocks: blocks };
+                        });
+                      } else if (data.type === "error") {
+                        set({ error: data.error });
+                      }
+                    } catch (e) {
+                      // Ignore parse errors
+                    }
+                  }
+                }
+              }
+            } finally {
+              // Refresh messages after streaming completes
+              await get().fetchMessages(projectId);
+              set({ isStreaming: false });
+            }
+          };
+
+          processStream();
         }
         // If already streaming locally, don't overwrite - local SSE stream is handling it
       } else {
@@ -107,6 +180,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
     } catch (error) {
       // Ignore errors for status check
+      console.error("Failed to fetch active session:", error);
     }
   },
 
