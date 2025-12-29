@@ -5,7 +5,8 @@
   "description": "AI-Powered App Builder using Claude Code CLI",
   "scripts": {
     "prepare": "bash scripts/setup-hooks.sh || true",
-    "dev": "pnpm run --parallel dev",
+    "dev": "node scripts/dev.js",
+    "dev:parallel": "pnpm run --parallel dev",
     "dev:web": "pnpm --filter @claudplit/web dev",
     "dev:server": "pnpm --filter @claudplit/server dev",
     "build": "pnpm run --parallel build",
