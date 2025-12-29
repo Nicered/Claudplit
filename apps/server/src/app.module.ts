@@ -6,6 +6,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { ProjectModule } from "./project/project.module";
 import { ChatModule } from "./chat/chat.module";
 import { PreviewModule } from "./preview/preview.module";
+import { FileModule } from "./file/file.module";
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { PreviewModule } from "./preview/preview.module";
     ProjectModule,
     ChatModule,
     PreviewModule,
+    FileModule,
   ],
   controllers: [AppController],
   providers: [AppService],

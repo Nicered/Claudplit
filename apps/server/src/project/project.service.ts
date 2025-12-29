@@ -25,6 +25,7 @@ export class ProjectService {
         id: true,
         name: true,
         projectType: true,
+        backendFramework: true,
         updatedAt: true,
       },
     });
@@ -48,11 +49,22 @@ export class ProjectService {
     // Create project directory
     await fs.mkdir(projectPath, { recursive: true });
 
+    // Create frontend/backend directories for fullstack projects
+    const isFullstack =
+      dto.backendFramework &&
+      dto.backendFramework !== "NONE";
+
+    if (isFullstack) {
+      await fs.mkdir(path.join(projectPath, "frontend"), { recursive: true });
+      await fs.mkdir(path.join(projectPath, "backend"), { recursive: true });
+    }
+
     // Create project in database
     const project = await this.prisma.project.create({
       data: {
         name: dto.name,
         projectType: dto.projectType,
+        backendFramework: dto.backendFramework || "NONE",
         path: projectPath,
         description: dto.description,
       },

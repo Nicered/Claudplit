@@ -3,9 +3,9 @@ import { Observable, Subject, map, finalize } from "rxjs";
 import { PrismaService } from "../prisma/prisma.service";
 import { ProjectService } from "../project/project.service";
 import { ClaudeCliService, ClaudeStreamEvent } from "./claude-cli.service";
-import { Role, ProjectType } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { randomUUID } from "crypto";
-import { WEB_SYSTEM_PROMPT } from "./prompts/web-system-prompt";
+import { getSystemPrompt } from "./prompts";
 
 export interface ChatStreamEvent {
   type: string;
@@ -93,11 +93,12 @@ export class ChatService {
 
           const projectPath = await this.projectService.getProjectPath(projectId);
 
-          // Build prompt with system context based on project type
-          let fullPrompt = content;
-          if (project.projectType === ProjectType.WEB) {
-            fullPrompt = `[System Context]\n${WEB_SYSTEM_PROMPT}\n\n[User Request]\n${content}`;
-          }
+          // Build prompt with system context based on project type and backend framework
+          const systemPrompt = getSystemPrompt(
+            project.projectType,
+            project.backendFramework
+          );
+          const fullPrompt = `[System Context]\n${systemPrompt}\n\n[User Request]\n${content}`;
 
           // Execute Claude CLI
           let fullResponse = "";

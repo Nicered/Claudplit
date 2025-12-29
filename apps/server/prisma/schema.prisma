@@ -8,13 +8,14 @@ datasource db {
 }
 
 model Project {
-  id          String      @id @default(uuid())
-  name        String
-  projectType ProjectType
-  path        String
-  description String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id               String           @id @default(uuid())
+  name             String
+  projectType      ProjectType
+  backendFramework BackendFramework @default(NONE)
+  path             String
+  description      String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   messages Message[]
 
@@ -37,6 +38,12 @@ model Message {
 enum ProjectType {
   WEB
   NATIVE
+}
+
+enum BackendFramework {
+  NONE
+  EXPRESS
+  FASTAPI
 }
 
 enum Role {
