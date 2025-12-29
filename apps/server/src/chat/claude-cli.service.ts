@@ -3,6 +3,8 @@ import { ConfigService } from "@nestjs/config";
 import { Observable, Subject } from "rxjs";
 import { spawn, ChildProcess } from "child_process";
 import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
 
 export interface ClaudeStreamEvent {
   type: "init" | "text" | "tool_use" | "tool_result" | "complete" | "error";
@@ -43,21 +45,32 @@ export class ClaudeCliService {
         return;
       }
 
-      // Escape prompt for shell
-      const escapedPrompt = prompt.replace(/'/g, "'\\''");
-      const cliCommand = `${this.cliPath} -p '${escapedPrompt}' --output-format stream-json --verbose --dangerously-skip-permissions`;
-
-      // Use script to emulate PTY for real-time output
-      const command = `script -q -c "${cliCommand.replace(/"/g, '\\"')}" /dev/null`;
-
       this.logger.log(`Executing Claude CLI in ${projectPath}`);
-      this.logger.log(`Command: ${command}`);
+      this.logger.log(`Prompt length: ${prompt.length} characters`);
 
-      const proc = spawn(command, [], {
+      // Write prompt to temp file to avoid shell escaping issues
+      const tempFile = path.join(os.tmpdir(), `claude-prompt-${sessionId}.txt`);
+      fs.writeFileSync(tempFile, prompt, "utf-8");
+
+      // Use script for PTY emulation with prompt file
+      const cliCommand = `${this.cliPath} -p "$(cat '${tempFile}')" --output-format stream-json --verbose --dangerously-skip-permissions`;
+      const command = `script -q -c '${cliCommand}' /dev/null`;
+
+      this.logger.log(`Using temp file: ${tempFile}`);
+
+      const proc = spawn("sh", ["-c", command], {
         cwd: projectPath,
         env: { ...process.env },
-        shell: true,
       });
+
+      // Cleanup temp file when done
+      const cleanup = () => {
+        try {
+          fs.unlinkSync(tempFile);
+        } catch (e) {
+          // Ignore cleanup errors
+        }
+      };
 
       this.logger.log(`Process spawned with PID: ${proc.pid}`);
 
@@ -101,6 +114,7 @@ export class ClaudeCliService {
       proc.on("close", (code, signal) => {
         this.logger.log(`Process closed with code=${code}, signal=${signal}`);
         this.activeProcesses.delete(sessionId);
+        cleanup();
 
         if (buffer.trim()) {
           try {
@@ -124,6 +138,7 @@ export class ClaudeCliService {
       proc.on("error", (error) => {
         this.logger.error(`Process error: ${error.message}`);
         this.activeProcesses.delete(sessionId);
+        cleanup();
         subscriber.error(error);
       });
 
@@ -131,6 +146,7 @@ export class ClaudeCliService {
         if (proc && !proc.killed) {
           proc.kill("SIGTERM");
           this.activeProcesses.delete(sessionId);
+          cleanup();
         }
       };
     });

@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { Play, Square, RefreshCw, ExternalLink, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePreviewStore } from "@/stores/usePreviewStore";
+import { useTranslation } from "@/lib/i18n";
 
 interface PreviewPanelProps {
   projectId: string;
 }
 
 export function PreviewPanel({ projectId }: PreviewPanelProps) {
+  const { t } = useTranslation();
   const [isMounted, setIsMounted] = useState(false);
   const {
     status,
@@ -88,14 +90,14 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
           />
           <span className="text-sm text-muted-foreground">
             {!isMounted
-              ? "로딩 중..."
+              ? t("common.loading")
               : status === "running"
-                ? "실행 중"
+                ? t("preview.title")
                 : status === "starting"
-                  ? "시작 중..."
+                  ? t("preview.starting")
                   : status === "error"
-                    ? "오류"
-                    : "중지됨"}
+                    ? t("common.error")
+                    : t("preview.stop")}
           </span>
         </div>
 
@@ -132,7 +134,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
               size="icon"
               onClick={handleStart}
               disabled={!isMounted || isLoading || status === "starting" || !projectReady.ready}
-              title={!projectReady.ready ? "프로젝트가 아직 준비되지 않았습니다" : "프리뷰 시작"}
+              title={!projectReady.ready ? t("preview.notReady") : t("preview.start")}
             >
               <Play className="h-4 w-4" />
             </Button>
@@ -157,13 +159,13 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-muted-foreground">
               <RefreshCw className="mx-auto h-8 w-8 animate-spin mb-2" />
-              <p>프리뷰 시작 중...</p>
+              <p>{t("preview.starting")}</p>
             </div>
           </div>
         ) : error ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-destructive">
-              <p className="font-medium">오류 발생</p>
+              <p className="font-medium">{t("common.error")}</p>
               <p className="text-sm">{error}</p>
               <Button
                 variant="outline"
@@ -171,7 +173,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                 onClick={handleStart}
                 className="mt-4"
               >
-                다시 시도
+                {t("common.refresh")}
               </Button>
             </div>
           </div>
@@ -179,7 +181,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-muted-foreground max-w-xs">
               <Package className="mx-auto h-8 w-8 mb-3 text-muted-foreground/50" />
-              <p className="font-medium mb-2">프로젝트 준비 중...</p>
+              <p className="font-medium mb-2">{t("preview.notReady")}</p>
               <div className="text-xs space-y-1">
                 <div className="flex items-center justify-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${projectReady.hasPackageJson ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
@@ -187,22 +189,21 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${projectReady.hasDevScript ? "bg-green-500" : "bg-gray-300"}`} />
-                  <span>dev 스크립트</span>
+                  <span>dev script</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <div className={`h-2 w-2 rounded-full ${projectReady.hasNodeModules ? "bg-green-500" : "bg-gray-300"}`} />
                   <span>node_modules</span>
                 </div>
               </div>
-              <p className="text-xs mt-4">AI가 프로젝트를 생성하면 자동으로 활성화됩니다</p>
+              <p className="text-xs mt-4">{t("preview.waitForAI")}</p>
             </div>
           </div>
         ) : (
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-muted-foreground">
               <Play className="mx-auto h-8 w-8 mb-2" />
-              <p>프리뷰를 시작하려면</p>
-              <p>시작 버튼을 클릭하세요</p>
+              <p>{t("preview.start")}</p>
             </div>
           </div>
         )}

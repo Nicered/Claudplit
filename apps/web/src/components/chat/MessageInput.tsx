@@ -3,6 +3,7 @@
 import { useState, useRef, KeyboardEvent } from "react";
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 interface MessageInputProps {
   onSend: (content: string) => void;
@@ -10,6 +11,7 @@ interface MessageInputProps {
 }
 
 export function MessageInput({ onSend, disabled }: MessageInputProps) {
+  const { t } = useTranslation();
   const [content, setContent] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -47,7 +49,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             onInput={handleInput}
-            placeholder="메시지를 입력하세요..."
+            placeholder={t("chat.placeholder")}
             disabled={disabled}
             rows={1}
             className="w-full resize-none rounded-lg border border-input bg-background px-4 py-3 pr-12 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -64,7 +66,7 @@ export function MessageInput({ onSend, disabled }: MessageInputProps) {
       </div>
       {disabled && (
         <p className="mt-2 text-xs text-muted-foreground">
-          AI가 응답 중입니다...
+          {t("chat.thinking")}
         </p>
       )}
     </div>

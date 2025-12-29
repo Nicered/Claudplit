@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -28,6 +29,7 @@ interface FileExplorerProps {
 }
 
 export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
+  const { t } = useTranslation();
   const [tree, setTree] = useState<FileNode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,11 +43,11 @@ export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
       const data = await res.json();
       setTree(data);
     } catch (e) {
-      setError("파일 목록을 불러올 수 없습니다");
+      setError(t("fileExplorer.error"));
     } finally {
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, t]);
 
   useEffect(() => {
     loadFileTree();
@@ -67,7 +69,7 @@ export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
 
   if (loading) {
     return (
-      <div className="p-4 text-sm text-muted-foreground">로딩 중...</div>
+      <div className="p-4 text-sm text-muted-foreground">{t("fileExplorer.loading")}</div>
     );
   }
 
@@ -77,7 +79,7 @@ export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
         <p className="text-sm text-destructive mb-2">{error}</p>
         <Button variant="outline" size="sm" onClick={loadFileTree}>
           <RefreshCw className="h-3 w-3 mr-1" />
-          다시 시도
+          {t("common.refresh")}
         </Button>
       </div>
     );
@@ -87,14 +89,14 @@ export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
     <div className="h-full flex flex-col">
       <div className="flex items-center justify-between px-3 py-2 border-b">
         <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-          파일 탐색기
+          {t("fileExplorer.title")}
         </span>
         <Button
           variant="ghost"
           size="icon"
           className="h-6 w-6"
           onClick={loadFileTree}
-          title="새로고침"
+          title={t("common.refresh")}
         >
           <RefreshCw className="h-3 w-3" />
         </Button>
@@ -102,9 +104,7 @@ export function FileExplorer({ projectId, onFileSelect }: FileExplorerProps) {
       <div className="flex-1 overflow-auto p-2">
         {tree.length === 0 ? (
           <div className="text-sm text-muted-foreground px-2 py-4 text-center">
-            파일이 없습니다
-            <br />
-            <span className="text-xs">채팅으로 코드를 생성해보세요</span>
+            {t("fileExplorer.empty")}
           </div>
         ) : (
           <FileTreeNode nodes={tree} onFileClick={handleFileClick} />
