@@ -2,11 +2,17 @@ import { create } from "zustand";
 import { api } from "@/lib/api";
 import type { PreviewStatus, PreviewStatusType } from "@claudeship/shared";
 
-interface ProjectReadyStatus {
-  ready: boolean;
+interface DirectoryStatus {
   hasPackageJson: boolean;
   hasNodeModules: boolean;
   hasDevScript: boolean;
+}
+
+interface ProjectReadyStatus {
+  ready: boolean;
+  isFullstack: boolean;
+  frontend: DirectoryStatus;
+  backend?: DirectoryStatus;
 }
 
 interface PreviewState {
@@ -31,9 +37,12 @@ export const usePreviewStore = create<PreviewState>((set, get) => ({
   isLoading: false,
   projectReady: {
     ready: false,
-    hasPackageJson: false,
-    hasNodeModules: false,
-    hasDevScript: false,
+    isFullstack: false,
+    frontend: {
+      hasPackageJson: false,
+      hasNodeModules: false,
+      hasDevScript: false,
+    },
   },
 
   startPreview: async (projectId: string) => {
@@ -103,9 +112,12 @@ export const usePreviewStore = create<PreviewState>((set, get) => ({
       set({
         projectReady: {
           ready: false,
-          hasPackageJson: false,
-          hasNodeModules: false,
-          hasDevScript: false,
+          isFullstack: false,
+          frontend: {
+            hasPackageJson: false,
+            hasNodeModules: false,
+            hasDevScript: false,
+          },
         },
       });
     }
