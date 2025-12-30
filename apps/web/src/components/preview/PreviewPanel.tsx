@@ -44,15 +44,19 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     clearError();
   }, [projectId, clearError]);
 
-  // Poll for project ready status when not running
+  // Poll for status updates
   useEffect(() => {
     if (!isMounted) return;
 
     fetchStatus(projectId);
     checkProjectReady(projectId);
 
-    // Poll every 2 seconds for faster response
+    // Poll every 2 seconds
     const interval = setInterval(() => {
+      // Always fetch status to detect URL changes (e.g., after server restart)
+      fetchStatus(projectId);
+
+      // Only check ready status when not running
       if (status !== "running" && status !== "starting") {
         checkProjectReady(projectId);
       }
