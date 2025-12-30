@@ -57,42 +57,100 @@ export class PreviewService {
 
   async checkProjectReady(projectId: string): Promise<{
     ready: boolean;
-    hasPackageJson: boolean;
-    hasNodeModules: boolean;
-    hasDevScript: boolean;
+    isFullstack: boolean;
+    frontend: {
+      hasPackageJson: boolean;
+      hasNodeModules: boolean;
+      hasDevScript: boolean;
+    };
+    backend?: {
+      hasPackageJson: boolean;
+      hasNodeModules: boolean;
+      hasDevScript: boolean;
+    };
   }> {
-    try {
-      const projectPath = await this.projectService.getProjectPath(projectId);
-      const packageJsonPath = path.join(projectPath, "package.json");
-      const nodeModulesPath = path.join(projectPath, "node_modules");
-
-      const hasPackageJson = fs.existsSync(packageJsonPath);
-      const hasNodeModules = fs.existsSync(nodeModulesPath);
-
-      let hasDevScript = false;
-      if (hasPackageJson) {
-        try {
-          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
-          hasDevScript = !!packageJson.scripts?.dev;
-        } catch {
-          // Invalid package.json
-        }
-      }
-
-      return {
-        ready: hasPackageJson && hasDevScript,
-        hasPackageJson,
-        hasNodeModules,
-        hasDevScript,
-      };
-    } catch {
-      return {
-        ready: false,
+    const notReady = {
+      ready: false,
+      isFullstack: false,
+      frontend: {
         hasPackageJson: false,
         hasNodeModules: false,
         hasDevScript: false,
+      },
+    };
+
+    try {
+      const project = await this.prisma.project.findUnique({
+        where: { id: projectId },
+      });
+
+      if (!project) {
+        return notReady;
+      }
+
+      const projectPath = project.path;
+      const isFullstack = project.backendFramework !== BackendFramework.NONE;
+
+      // Check frontend
+      const frontendPath = isFullstack
+        ? path.join(projectPath, "frontend")
+        : projectPath;
+
+      const frontendStatus = this.checkDirectoryReady(frontendPath);
+
+      // For non-fullstack projects
+      if (!isFullstack) {
+        return {
+          ready: frontendStatus.hasPackageJson && frontendStatus.hasDevScript,
+          isFullstack: false,
+          frontend: frontendStatus,
+        };
+      }
+
+      // Check backend for fullstack projects
+      const backendPath = path.join(projectPath, "backend");
+      const backendStatus = this.checkDirectoryReady(backendPath);
+
+      const frontendReady = frontendStatus.hasPackageJson && frontendStatus.hasDevScript;
+      const backendReady = backendStatus.hasPackageJson && backendStatus.hasDevScript;
+
+      return {
+        ready: frontendReady && backendReady,
+        isFullstack: true,
+        frontend: frontendStatus,
+        backend: backendStatus,
       };
+    } catch {
+      return notReady;
     }
+  }
+
+  private checkDirectoryReady(dirPath: string): {
+    hasPackageJson: boolean;
+    hasNodeModules: boolean;
+    hasDevScript: boolean;
+  } {
+    const packageJsonPath = path.join(dirPath, "package.json");
+    const nodeModulesPath = path.join(dirPath, "node_modules");
+
+    const hasPackageJson = fs.existsSync(packageJsonPath);
+    const hasNodeModules = fs.existsSync(nodeModulesPath);
+
+    let hasDevScript = false;
+    if (hasPackageJson) {
+      try {
+        const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+        hasDevScript = !!packageJson.scripts?.dev;
+      } catch {
+        // Invalid package.json
+      }
+    }
+
+    return {
+      hasPackageJson,
+      hasNodeModules,
+      hasDevScript,
+    };
   }
 
   async start(projectId: string): Promise<PreviewStatus> {
@@ -181,6 +239,17 @@ export class PreviewService {
       }
     }
 
+    // Clear .next cache to prevent CSS loading issues
+    const nextCachePath = path.join(projectPath, ".next");
+    if (fs.existsSync(nextCachePath)) {
+      this.logger.log(`Clearing .next cache for project ${projectId}`);
+      try {
+        fs.rmSync(nextCachePath, { recursive: true, force: true });
+      } catch (e) {
+        this.logger.warn(`Failed to clear .next cache: ${e}`);
+      }
+    }
+
     const port = await this.findAvailablePort();
 
     this.logger.log(
@@ -234,9 +303,9 @@ export class PreviewService {
       };
     }
 
-    // Get available ports
+    // Get available ports (ensure different ports)
     const frontendPort = await this.findAvailablePort();
-    const backendPort = await this.findAvailablePort();
+    const backendPort = await this.findAvailablePort([frontendPort]);
 
     this.logger.log(
       `Starting fullstack preview: frontend=${frontendPort}, backend=${backendPort}`
@@ -364,6 +433,17 @@ export class PreviewService {
       await this.installDependencies(frontendPath);
     }
 
+    // Clear .next cache to prevent CSS loading issues
+    const nextCachePath = path.join(frontendPath, ".next");
+    if (fs.existsSync(nextCachePath)) {
+      this.logger.log(`Clearing .next cache for frontend`);
+      try {
+        fs.rmSync(nextCachePath, { recursive: true, force: true });
+      } catch (e) {
+        this.logger.warn(`Failed to clear .next cache: ${e}`);
+      }
+    }
+
     const proc = spawn("npm", ["run", "dev", "--", "--port", String(port)], {
       cwd: frontendPath,
       shell: true,
@@ -487,8 +567,11 @@ export class PreviewService {
     this.previews.clear();
   }
 
-  private async findAvailablePort(): Promise<number> {
+  private async findAvailablePort(exclude: number[] = []): Promise<number> {
     for (let port = this.portRange.min; port <= this.portRange.max; port++) {
+      if (exclude.includes(port)) {
+        continue;
+      }
       const isAvailable = await this.isPortAvailable(port);
       if (isAvailable) {
         return port;

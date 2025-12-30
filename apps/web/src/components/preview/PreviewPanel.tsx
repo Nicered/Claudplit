@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Play, Square, RefreshCw, ExternalLink, Package, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePreviewStore } from "@/stores/usePreviewStore";
@@ -24,12 +24,25 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     refreshPreview,
     fetchStatus,
     checkProjectReady,
+    clearError,
   } = usePreviewStore();
+
+  // Track previous ready state to detect ready transitions
+  const prevReadyRef = useRef(false);
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
 
   // Mark as mounted after first render
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Reset state when project changes
+  useEffect(() => {
+    prevReadyRef.current = false;
+    retryCountRef.current = 0;
+    clearError();
+  }, [projectId, clearError]);
 
   // Poll for project ready status when not running
   useEffect(() => {
@@ -38,28 +51,49 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     fetchStatus(projectId);
     checkProjectReady(projectId);
 
-    // Poll every 3 seconds when project is not ready
+    // Poll every 2 seconds for faster response
     const interval = setInterval(() => {
       if (status !== "running" && status !== "starting") {
         checkProjectReady(projectId);
       }
-    }, 3000);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [projectId, fetchStatus, checkProjectReady, status, isMounted]);
 
   // Auto-start preview when project becomes ready
   useEffect(() => {
-    if (
-      isMounted &&
-      projectReady.ready &&
-      status === "stopped" &&
-      !isLoading &&
-      !error
-    ) {
+    if (!isMounted || isLoading || status === "starting") return;
+
+    const wasReady = prevReadyRef.current;
+    const isNowReady = projectReady.ready;
+
+    // Detect ready transition (false -> true)
+    if (!wasReady && isNowReady) {
+      retryCountRef.current = 0; // Reset retry count on new ready state
+    }
+
+    prevReadyRef.current = isNowReady;
+
+    // Auto-start when ready and stopped
+    if (isNowReady && status === "stopped" && retryCountRef.current < maxRetries) {
+      retryCountRef.current++;
       startPreview(projectId);
     }
-  }, [isMounted, projectReady.ready, status, isLoading, error, projectId, startPreview]);
+
+    // Auto-retry on error after delay (if still ready)
+    if (isNowReady && status === "error" && retryCountRef.current < maxRetries) {
+      const retryTimeout = setTimeout(() => {
+        if (projectReady.ready && retryCountRef.current < maxRetries) {
+          retryCountRef.current++;
+          clearError();
+          startPreview(projectId);
+        }
+      }, 3000); // Wait 3 seconds before retry
+
+      return () => clearTimeout(retryTimeout);
+    }
+  }, [isMounted, projectReady.ready, status, isLoading, projectId, startPreview, clearError]);
 
   const handleStart = () => startPreview(projectId);
   const handleStop = () => stopPreview(projectId);
@@ -157,7 +191,6 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
             key={url}
             src={url}
             className="h-full w-full border-0"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
           />
         ) : status === "starting" ? (
           <div className="flex h-full items-center justify-center">
@@ -183,23 +216,46 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
           </div>
         ) : !projectReady.ready ? (
           <div className="flex h-full items-center justify-center">
-            <div className="text-center text-muted-foreground max-w-xs">
+            <div className="text-center text-muted-foreground max-w-sm">
               <Package className="mx-auto h-8 w-8 mb-3 text-muted-foreground/50" />
-              <p className="font-medium mb-2">{t("preview.notReady")}</p>
-              <div className="text-xs space-y-1">
-                <div className="flex items-center justify-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${projectReady.hasPackageJson ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
-                  <span>package.json</span>
+              <p className="font-medium mb-3">{t("preview.notReady")}</p>
+
+              <div className="text-xs space-y-3">
+                {/* Frontend Status */}
+                <div className="border rounded-lg p-2">
+                  <p className="font-medium mb-1.5 text-foreground">
+                    {projectReady.isFullstack ? "Frontend" : "Project"}
+                  </p>
+                  <div className="space-y-1">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${projectReady.frontend.hasPackageJson ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
+                      <span>package.json</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2">
+                      <div className={`h-2 w-2 rounded-full ${projectReady.frontend.hasDevScript ? "bg-green-500" : "bg-gray-300"}`} />
+                      <span>dev script</span>
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${projectReady.hasDevScript ? "bg-green-500" : "bg-gray-300"}`} />
-                  <span>dev script</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${projectReady.hasNodeModules ? "bg-green-500" : "bg-gray-300"}`} />
-                  <span>node_modules</span>
-                </div>
+
+                {/* Backend Status (for fullstack) */}
+                {projectReady.isFullstack && projectReady.backend && (
+                  <div className="border rounded-lg p-2">
+                    <p className="font-medium mb-1.5 text-foreground">Backend</p>
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasPackageJson ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
+                        <span>package.json</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasDevScript ? "bg-green-500" : "bg-gray-300"}`} />
+                        <span>dev script</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
+
               <p className="text-xs mt-4">{t("preview.waitForAI")}</p>
             </div>
           </div>

@@ -233,6 +233,69 @@ export function Counter() {
 - Never create Python, Ruby, or non-TypeScript files
 - Never use outdated patterns (pages router, getServerSideProps)
 
+## Clean Code Principles (MUST FOLLOW)
+
+### 1. Component Architecture
+- **Small, focused components**: Each component should do ONE thing well (Single Responsibility)
+- **Maximum reusability**: Extract common patterns into reusable components
+- **No monolithic files**: Split large files (>200 lines) into smaller, focused modules
+- **Clear naming**: Use descriptive names that explain what the component/function does
+  - Components: \`UserProfileCard\`, \`ProductListItem\` (PascalCase, noun-based)
+  - Functions: \`calculateTotalPrice\`, \`validateUserInput\` (camelCase, verb-based)
+  - Variables: \`isLoading\`, \`hasError\`, \`userCount\` (camelCase, descriptive)
+
+### 2. Design System & Styling
+- **Never write inline styles** in components - use Tailwind classes only
+- **Use semantic color tokens**: \`bg-primary\`, \`text-muted-foreground\` instead of \`bg-blue-500\`
+- **Define custom styles** in \`globals.css\` and \`tailwind.config.ts\` only
+- **Consistent spacing**: Use Tailwind spacing scale (p-2, p-4, p-6, etc.)
+- **Mobile-first**: Design for mobile, then add responsive breakpoints
+
+### 3. Code Quality Standards
+- **Valid TypeScript**: No type errors, no \`any\` types, proper interfaces for all data
+- **Proper error handling**: Try-catch for async operations, error boundaries for components
+- **No console.log** in production code
+- **No commented-out code**: Delete unused code, use git for history
+- **DRY (Don't Repeat Yourself)**: Extract repeated logic into functions/hooks
+
+### 4. File Organization
+\`\`\`
+components/
+├── ui/           # shadcn/ui base components
+├── features/     # Feature-specific components
+│   ├── auth/
+│   └── products/
+└── layout/       # Layout components (Header, Footer, Sidebar)
+
+lib/
+├── utils.ts      # Utility functions
+└── hooks/        # Custom React hooks
+
+app/
+├── layout.tsx    # Root layout
+├── page.tsx      # Home page
+└── [feature]/    # Feature routes
+\`\`\`
+
+### 5. Function Guidelines
+- **Max 20-30 lines** per function - split larger functions
+- **Max 3 parameters** - use object parameter for more
+- **Early returns**: Handle edge cases first, then main logic
+- **Pure functions** when possible: Same input → same output, no side effects
+
+### 6. React Best Practices
+- **Custom hooks** for logic reuse (\`useAuth\`, \`useProducts\`)
+- **Memoization** for expensive operations (\`useMemo\`, \`useCallback\`)
+- **Proper dependency arrays** in useEffect
+- **Loading/Error states**: Always handle loading, error, and empty states
+- **Suspense boundaries** for code splitting
+
+### 7. Avoid Over-Engineering
+- **No premature abstraction**: Don't create utilities for one-time use
+- **No feature creep**: Only implement what's explicitly requested
+- **Simple solutions first**: Choose the simplest approach that works
+- **No unnecessary dependencies**: Use built-in APIs when possible
+
 ## Response Format
 
 When creating or modifying files:
