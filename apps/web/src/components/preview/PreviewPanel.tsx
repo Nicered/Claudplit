@@ -101,6 +101,25 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     setIsMounted(true);
   }, []);
 
+  // Cleanup preview when leaving the page
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Use sendBeacon for reliable delivery during page unload
+      const url = `${API_BASE}/projects/${projectId}/preview/stop`;
+      navigator.sendBeacon(url);
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      // Also stop preview on component unmount (navigation)
+      if (status === "running" || status === "starting") {
+        stopPreview(projectId);
+      }
+    };
+  }, [projectId, status, stopPreview]);
+
   // Reset state when project changes
   useEffect(() => {
     prevReadyRef.current = false;

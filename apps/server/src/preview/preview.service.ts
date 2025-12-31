@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { spawn, ChildProcess } from "child_process";
 import { ProjectService } from "../project/project.service";
 import { PrismaService } from "../prisma/prisma.service";
@@ -26,15 +26,21 @@ export interface PreviewStatus {
 }
 
 @Injectable()
-export class PreviewService {
+export class PreviewService implements OnModuleDestroy {
   private readonly logger = new Logger(PreviewService.name);
   private previews: Map<string, PreviewInfo> = new Map();
+  private activeConnections: Map<string, number> = new Map(); // projectId -> connection count
   private readonly portRange = { min: 3001, max: 3099 };
 
   constructor(
     private projectService: ProjectService,
     private prisma: PrismaService
   ) {}
+
+  async onModuleDestroy() {
+    this.logger.log("Stopping all preview servers on shutdown...");
+    await this.stopAll();
+  }
 
   async getStatus(projectId: string): Promise<PreviewStatus> {
     const preview = this.previews.get(projectId);
@@ -563,8 +569,47 @@ export class PreviewService {
       if (preview.process) {
         preview.process.kill("SIGTERM");
       }
+      if (preview.backendProcess) {
+        preview.backendProcess.kill("SIGTERM");
+      }
     }
     this.previews.clear();
+    this.activeConnections.clear();
+  }
+
+  /**
+   * Register an active connection for a project.
+   * Called when SSE client connects.
+   */
+  registerConnection(projectId: string): void {
+    const count = this.activeConnections.get(projectId) || 0;
+    this.activeConnections.set(projectId, count + 1);
+    this.logger.debug(`Connection registered for ${projectId}, total: ${count + 1}`);
+  }
+
+  /**
+   * Unregister a connection for a project.
+   * Automatically stops preview server if no active connections remain.
+   */
+  async unregisterConnection(projectId: string): Promise<void> {
+    const count = this.activeConnections.get(projectId) || 0;
+    const newCount = Math.max(0, count - 1);
+
+    if (newCount === 0) {
+      this.activeConnections.delete(projectId);
+      this.logger.log(`No active connections for ${projectId}, stopping preview...`);
+      await this.stop(projectId);
+    } else {
+      this.activeConnections.set(projectId, newCount);
+      this.logger.debug(`Connection unregistered for ${projectId}, remaining: ${newCount}`);
+    }
+  }
+
+  /**
+   * Get the number of active connections for a project.
+   */
+  getConnectionCount(projectId: string): number {
+    return this.activeConnections.get(projectId) || 0;
   }
 
   private async findAvailablePort(exclude: number[] = []): Promise<number> {

@@ -50,6 +50,9 @@ export class PreviewController {
       });
     }
 
+    // Register this connection
+    this.previewService.registerConnection(projectId);
+
     // Start watching if not already
     let subject = this.fileWatcherService.getChangeSubject(projectId);
     if (!subject) {
@@ -62,6 +65,8 @@ export class PreviewController {
     res.on("close", () => {
       closeSubject.next();
       closeSubject.complete();
+      // Unregister connection and potentially stop preview
+      this.previewService.unregisterConnection(projectId);
     });
 
     // Send heartbeat every 30 seconds to keep connection alive
