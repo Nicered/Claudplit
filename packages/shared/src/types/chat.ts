@@ -28,6 +28,22 @@ export interface ToolUseInfo {
   success?: boolean;
 }
 
+export interface AskUserQuestionOption {
+  label: string;
+  description?: string;
+}
+
+export interface AskUserQuestion {
+  question: string;
+  header?: string;
+  options: AskUserQuestionOption[];
+  multiSelect?: boolean;
+}
+
+export interface AskUserQuestionData {
+  questions: AskUserQuestion[];
+}
+
 export interface SendMessageInput {
   content: string;
   mode?: ChatMode;
@@ -39,6 +55,7 @@ export type StreamEventType =
   | "tool_use"
   | "tool_result"
   | "permission_request"
+  | "ask_user_question"
   | "complete"
   | "error";
 
@@ -46,6 +63,7 @@ export interface StreamEvent {
   type: StreamEventType;
   content?: string;
   tool?: ToolUseInfo;
+  askUserQuestion?: AskUserQuestionData;
   error?: string;
   messageId?: string;
 }

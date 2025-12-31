@@ -1,6 +1,6 @@
 "use client";
 
-import type { StreamingBlock } from "@/stores/useChatStore";
+import { useChatStore, type StreamingBlock } from "@/stores/useChatStore";
 import {
   FileText,
   FolderSearch,
@@ -14,10 +14,12 @@ import {
   Bot,
 } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
+import { AskUserQuestionBlock } from "./AskUserQuestionBlock";
 
 interface StreamingMessageProps {
   blocks: StreamingBlock[];
   isStreaming?: boolean;
+  projectId: string;
 }
 
 const toolIcons: Record<string, React.ReactNode> = {
@@ -119,8 +121,13 @@ function ToolUseBlock({ block }: { block: StreamingBlock }) {
   );
 }
 
-export function StreamingMessage({ blocks, isStreaming = true }: StreamingMessageProps) {
+export function StreamingMessage({ blocks, isStreaming = true, projectId }: StreamingMessageProps) {
   const hasBlocks = blocks.length > 0;
+  const { respondToQuestion, pendingQuestion } = useChatStore();
+
+  const handleQuestionSubmit = (answers: Record<string, string>) => {
+    respondToQuestion(projectId, answers);
+  };
 
   return (
     <div className="flex gap-3 p-4 rounded-lg bg-background">
@@ -135,6 +142,16 @@ export function StreamingMessage({ blocks, isStreaming = true }: StreamingMessag
           }
           if (block.type === "tool_use") {
             return <ToolUseBlock key={block.id} block={block} />;
+          }
+          if (block.type === "ask_user_question" && block.askUserQuestion) {
+            return (
+              <AskUserQuestionBlock
+                key={block.id}
+                data={block.askUserQuestion}
+                isWaiting={block.status === "waiting"}
+                onSubmit={handleQuestionSubmit}
+              />
+            );
           }
           return null;
         })}

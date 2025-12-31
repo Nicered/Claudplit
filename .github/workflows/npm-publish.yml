@@ -48,8 +48,11 @@ jobs:
       - name: Update version from release tag
         if: github.event_name == 'release'
         run: |
-          # Remove refs/tags/ prefix, then remove optional v prefix
-          VERSION=${GITHUB_REF#refs/tags/}
+          # Release tag format: claudeship-v0.2.3
+          # Extract version from GITHUB_REF (refs/tags/claudeship-v0.2.3)
+          TAG=${GITHUB_REF#refs/tags/}
+          # Remove claudeship- prefix, then v prefix
+          VERSION=${TAG#claudeship-}
           VERSION=${VERSION#v}
           echo "Updating version to $VERSION"
           npm version $VERSION --no-git-tag-version --allow-same-version

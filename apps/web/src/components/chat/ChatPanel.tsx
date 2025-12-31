@@ -77,6 +77,7 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
         messages={messages}
         streamingBlocks={streamingBlocks}
         isStreaming={isStreaming}
+        projectId={projectId}
       />
       <MessageInput
         onSend={handleSend}

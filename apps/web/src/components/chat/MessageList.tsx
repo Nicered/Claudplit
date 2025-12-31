@@ -10,12 +10,14 @@ interface MessageListProps {
   messages: ChatMessage[];
   streamingBlocks?: StreamingBlock[];
   isStreaming?: boolean;
+  projectId: string;
 }
 
 export function MessageList({
   messages,
   streamingBlocks = [],
   isStreaming,
+  projectId,
 }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -40,7 +42,7 @@ export function MessageList({
 
       {/* Show streaming blocks if there are any (during or after streaming) */}
       {streamingBlocks.length > 0 && (
-        <StreamingMessage blocks={streamingBlocks} isStreaming={isStreaming} />
+        <StreamingMessage blocks={streamingBlocks} isStreaming={isStreaming} projectId={projectId} />
       )}
 
       <div ref={bottomRef} />

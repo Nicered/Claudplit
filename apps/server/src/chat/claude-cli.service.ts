@@ -7,12 +7,27 @@ import * as os from "os";
 import * as path from "path";
 import { ChatMode } from "./dto/send-message.dto";
 
+export interface AskUserQuestionOption {
+  label: string;
+  description?: string;
+}
+
+export interface AskUserQuestion {
+  question: string;
+  header?: string;
+  options: AskUserQuestionOption[];
+  multiSelect?: boolean;
+}
+
 export interface ClaudeStreamEvent {
-  type: "init" | "text" | "tool_use" | "tool_result" | "complete" | "error";
+  type: "init" | "text" | "tool_use" | "tool_result" | "ask_user_question" | "complete" | "error";
   content?: string;
   tool?: {
     name: string;
     input?: Record<string, unknown>;
+  };
+  askUserQuestion?: {
+    questions: AskUserQuestion[];
   };
   error?: string;
   sessionId?: string;
@@ -228,11 +243,24 @@ export class ClaudeCliService {
             }
 
             if (item.type === "tool_use") {
+              const toolName = item.name as string;
+              const toolInput = item.input as Record<string, unknown>;
+
+              // Special handling for AskUserQuestion
+              if (toolName === "AskUserQuestion") {
+                return {
+                  type: "ask_user_question",
+                  askUserQuestion: {
+                    questions: toolInput.questions as AskUserQuestion[],
+                  },
+                };
+              }
+
               return {
                 type: "tool_use",
                 tool: {
-                  name: item.name as string,
-                  input: item.input as Record<string, unknown>,
+                  name: toolName,
+                  input: toolInput,
                 },
               };
             }

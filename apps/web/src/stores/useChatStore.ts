@@ -1,16 +1,17 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
-import { Role, type ChatMessage, type StreamEvent, type ChatMode } from "@claudeship/shared";
+import { Role, type ChatMessage, type StreamEvent, type ChatMode, type AskUserQuestionData } from "@claudeship/shared";
 
 export interface StreamingBlock {
   id: string;
-  type: "text" | "tool_use" | "tool_result";
+  type: "text" | "tool_use" | "tool_result" | "ask_user_question";
   content?: string;
   tool?: {
     name: string;
     input?: Record<string, unknown>;
   };
-  status?: "running" | "completed" | "error";
+  askUserQuestion?: AskUserQuestionData;
+  status?: "running" | "completed" | "error" | "waiting";
   result?: string;
 }
 
@@ -36,12 +37,14 @@ interface ChatState {
   messageQueue: QueuedMessage[];
   isProcessingQueue: boolean;
   mode: ChatMode;
+  pendingQuestion: AskUserQuestionData | null;
 
   fetchMessages: (projectId: string) => Promise<void>;
   fetchActiveSession: (projectId: string) => Promise<void>;
   sendMessage: (projectId: string, content: string, fromQueue?: boolean) => Promise<void>;
   queueMessage: (projectId: string, content: string) => void;
   processQueue: (projectId: string) => Promise<void>;
+  respondToQuestion: (projectId: string, answers: Record<string, string>) => Promise<void>;
   addMessage: (message: ChatMessage) => void;
   clearMessages: () => void;
   clearError: () => void;
@@ -56,6 +59,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   messageQueue: [],
   isProcessingQueue: false,
   mode: "build",
+  pendingQuestion: null,
 
   setMode: (mode: ChatMode) => set({ mode }),
 
@@ -368,6 +372,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
                   }
                   return { streamingBlocks: blocks };
                 });
+              } else if (data.type === "ask_user_question" && data.askUserQuestion) {
+                // Add ask_user_question block and set pending question
+                const questionBlock: StreamingBlock = {
+                  id: `question-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                  type: "ask_user_question",
+                  askUserQuestion: data.askUserQuestion,
+                  status: "waiting",
+                };
+                set((state) => ({
+                  streamingBlocks: [...state.streamingBlocks, questionBlock],
+                  pendingQuestion: data.askUserQuestion,
+                }));
               } else if (data.type === "error") {
                 set({ error: data.error });
               }
@@ -409,5 +425,33 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   clearError: () => {
     set({ error: null });
+  },
+
+  respondToQuestion: async (projectId: string, answers: Record<string, string>) => {
+    const state = get();
+    if (!state.pendingQuestion) return;
+
+    // Format the answers as a user response
+    const responseContent = Object.entries(answers)
+      .map(([question, answer]) => `${question}: ${answer}`)
+      .join("\n");
+
+    // Clear the pending question and update the question block status
+    set((state) => {
+      const blocks = [...state.streamingBlocks];
+      for (let i = blocks.length - 1; i >= 0; i--) {
+        if (blocks[i].type === "ask_user_question" && blocks[i].status === "waiting") {
+          blocks[i] = {
+            ...blocks[i],
+            status: "completed",
+          };
+          break;
+        }
+      }
+      return { streamingBlocks: blocks, pendingQuestion: null };
+    });
+
+    // Send the response as a new message to continue the conversation
+    await get().sendMessage(projectId, responseContent);
   },
 }));
