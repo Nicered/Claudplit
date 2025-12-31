@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.4](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.3...claudeship-v0.2.4) (2025-12-31)
+
+
+### Features
+
+* Add AskUserQuestion UI component ([ec7d472](https://github.com/Nicered/ClaudeShip/commit/ec7d472abe809b931cf1d0e83ed58f86da547fd6))
+
+
+### Bug Fixes
+
+* Parse version from claudeship-v prefix in npm-publish ([c70a980](https://github.com/Nicered/ClaudeShip/commit/c70a9802f1a1466c987116f0a19908737406333a))
+
 ## [0.2.3](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.2...claudeship-v0.2.3) (2025-12-31)
 
 
