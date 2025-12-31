@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://nicered.github.io/claudeship/logo.svg" alt="ClaudeShip" width="120">
+  <img src="https://nicered.github.io/ClaudeShip/logo.svg" alt="ClaudeShip" width="120">
 </p>
 
 <h1 align="center">ClaudeShip</h1>
@@ -17,7 +17,7 @@
 </p>
 
 <p align="center">
-  <a href="https://nicered.github.io/claudeship">Website</a> •
+  <a href="https://nicered.github.io/ClaudeShip">Website</a> •
   <a href="#quick-start">Quick Start</a> •
   <a href="#features">Features</a> •
   <a href="./docs/README.ko.md">한국어</a>
