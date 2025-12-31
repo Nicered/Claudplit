@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.2...claudeship-v0.2.3) (2025-12-31)
+
+
+### Bug Fixes
+
+* Update release-please action with PAT support ([354a545](https://github.com/Nicered/ClaudeShip/commit/354a545905211013160d5a5e55f50d464ba399a3))
+
 ## [0.2.2](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.1...claudeship-v0.2.2) (2025-12-31)
 
 
