@@ -40,13 +40,16 @@
   "chat": {
     "title": "Chat",
     "placeholder": "Describe what you want to build...",
+    "askPlaceholder": "Ask a question about your project...",
     "queuePlaceholder": "Queue another message...",
     "send": "Send",
     "thinking": "AI is thinking...",
     "queueCount": "{count} message(s) queued",
     "toolRunning": "Running",
     "toolCompleted": "Completed",
-    "newConversation": "New Chat"
+    "newConversation": "New Chat",
+    "modeAsk": "Ask",
+    "modeBuild": "Build"
   },
   "preview": {
     "title": "Preview",

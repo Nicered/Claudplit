@@ -6,6 +6,21 @@ import { ClaudeCliService, ClaudeStreamEvent } from "./claude-cli.service";
 import { Role } from "@prisma/client";
 import { randomUUID } from "crypto";
 import { getSystemPrompt } from "./prompts";
+import { ChatMode } from "./dto/send-message.dto";
+
+// Ask mode system prompt addition
+const ASK_MODE_PROMPT = `
+[Mode: Ask (Read-Only)]
+You are in Ask mode. This is a read-only mode where you can ONLY:
+- Read and analyze the codebase
+- Answer questions about the code structure, patterns, and implementation
+- Explain how things work
+- Suggest improvements (but NOT implement them)
+
+You CANNOT modify, create, or delete any files in this mode.
+If the user asks to make code changes, politely respond:
+"I'm currently in Ask mode which is read-only. Please switch to Build mode to make changes to the code."
+`;
 
 export interface ChatStreamEvent {
   type: string;
@@ -98,7 +113,8 @@ export class ChatService {
 
   sendMessage(
     projectId: string,
-    content: string
+    content: string,
+    mode: ChatMode = "build"
   ): Observable<MessageEvent> {
     const sessionId = randomUUID();
 
@@ -175,7 +191,11 @@ export class ChatService {
             }
           }
 
-          const fullPrompt = `[System Context]\n${systemPrompt}\n\n${conversationContext}[User Request]\n${content}`;
+          // Add mode-specific prompt for Ask mode
+          const modePrompt = mode === "ask" ? ASK_MODE_PROMPT : "";
+          const fullPrompt = `[System Context]\n${systemPrompt}${modePrompt}\n\n${conversationContext}[User Request]\n${content}`;
+
+          this.logger.log(`Chat mode: ${mode}`);
 
           // Execute Claude CLI with session resumption if available
           let fullResponse = "";
@@ -191,7 +211,8 @@ export class ChatService {
             projectPath,
             fullPrompt,
             sessionId,
-            project.claudeSessionId || undefined
+            project.claudeSessionId || undefined,
+            mode
           );
 
           cliStream.subscribe({

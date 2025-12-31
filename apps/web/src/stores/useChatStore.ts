@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
-import { Role, type ChatMessage, type StreamEvent } from "@claudeship/shared";
+import { Role, type ChatMessage, type StreamEvent, type ChatMode } from "@claudeship/shared";
 
 export interface StreamingBlock {
   id: string;
@@ -35,6 +35,7 @@ interface ChatState {
   error: string | null;
   messageQueue: QueuedMessage[];
   isProcessingQueue: boolean;
+  mode: ChatMode;
 
   fetchMessages: (projectId: string) => Promise<void>;
   fetchActiveSession: (projectId: string) => Promise<void>;
@@ -44,6 +45,7 @@ interface ChatState {
   addMessage: (message: ChatMessage) => void;
   clearMessages: () => void;
   clearError: () => void;
+  setMode: (mode: ChatMode) => void;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -53,6 +55,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
   error: null,
   messageQueue: [],
   isProcessingQueue: false,
+  mode: "build",
+
+  setMode: (mode: ChatMode) => set({ mode }),
 
   fetchMessages: async (projectId: string) => {
     try {
@@ -284,6 +289,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     });
 
     try {
+      const currentMode = get().mode;
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:14000/api"}/projects/${projectId}/chat`,
         {
@@ -291,7 +297,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({ content, mode: currentMode }),
         }
       );
 
