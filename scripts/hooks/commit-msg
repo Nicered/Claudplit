@@ -2,9 +2,10 @@
 
 # Commit message validation hook
 # Rules:
-# 1. Format: [TYPE] 제목
-# 2. No Claude signature
-# 3. Maximum 4 bullet points
+# 1. Format: [TYPE] 제목 OR type: 제목 (Conventional Commits)
+# 2. [TYPE] format is auto-converted to type: for Release Please
+# 3. No Claude signature
+# 4. Maximum 4 bullet points
 
 COMMIT_MSG_FILE=$1
 COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
@@ -19,29 +20,54 @@ COMMIT_MSG="$CLEANED_MSG"
 # Get the first line (title)
 TITLE=$(echo "$COMMIT_MSG" | head -n 1)
 
-# Allowed types
-ALLOWED_TYPES="FEAT|FIX|DOCS|STYLE|REFACTOR|TEST|CHORE|PERF|CI|BUILD"
+# Allowed types (uppercase for [TYPE], lowercase for type:)
+ALLOWED_TYPES_UPPER="FEAT|FIX|DOCS|STYLE|REFACTOR|TEST|CHORE|PERF|CI|BUILD"
+ALLOWED_TYPES_LOWER="feat|fix|docs|style|refactor|test|chore|perf|ci|build"
 
-# Check format: [TYPE] 제목
-if ! echo "$TITLE" | grep -qE "^\[($ALLOWED_TYPES)\] .+"; then
+# Check if it's [TYPE] format and convert to type: format
+if echo "$TITLE" | grep -qE "^\[($ALLOWED_TYPES_UPPER)\] .+"; then
+    # Extract type and message
+    TYPE=$(echo "$TITLE" | sed -E "s/^\[($ALLOWED_TYPES_UPPER)\] .+/\1/")
+    MESSAGE=$(echo "$TITLE" | sed -E "s/^\[($ALLOWED_TYPES_UPPER)\] (.+)/\2/")
+
+    # Convert to lowercase
+    TYPE_LOWER=$(echo "$TYPE" | tr '[:upper:]' '[:lower:]')
+
+    # Create new title in Conventional Commits format
+    NEW_TITLE="$TYPE_LOWER: $MESSAGE"
+
+    # Replace first line with converted format
+    CONVERTED_MSG=$(echo "$COMMIT_MSG" | sed "1s/.*/$NEW_TITLE/")
+    echo "$CONVERTED_MSG" > "$COMMIT_MSG_FILE"
+    COMMIT_MSG="$CONVERTED_MSG"
+    TITLE="$NEW_TITLE"
+
+# Check if it's already in Conventional Commits format
+elif echo "$TITLE" | grep -qE "^($ALLOWED_TYPES_LOWER)(\(.+\))?: .+"; then
+    # Already in correct format, do nothing
+    :
+else
     echo ""
     echo "❌ 커밋 메시지 형식 오류"
     echo ""
-    echo "올바른 형식: [TYPE] 제목"
+    echo "허용되는 형식:"
+    echo "  1. [TYPE] 제목  (자동으로 Conventional Commits로 변환됨)"
+    echo "  2. type: 제목   (Conventional Commits)"
     echo ""
     echo "허용되는 TYPE:"
-    echo "  FEAT     - 새로운 기능"
-    echo "  FIX      - 버그 수정"
-    echo "  DOCS     - 문서 변경"
-    echo "  STYLE    - 코드 포맷팅"
-    echo "  REFACTOR - 리팩토링"
-    echo "  TEST     - 테스트"
-    echo "  CHORE    - 기타 작업"
-    echo "  PERF     - 성능 개선"
-    echo "  CI       - CI/CD"
-    echo "  BUILD    - 빌드 설정"
+    echo "  FEAT/feat     - 새로운 기능"
+    echo "  FIX/fix       - 버그 수정"
+    echo "  DOCS/docs     - 문서 변경"
+    echo "  STYLE/style   - 코드 포맷팅"
+    echo "  REFACTOR/refactor - 리팩토링"
+    echo "  TEST/test     - 테스트"
+    echo "  CHORE/chore   - 기타 작업"
+    echo "  PERF/perf     - 성능 개선"
+    echo "  CI/ci         - CI/CD"
+    echo "  BUILD/build   - 빌드 설정"
     echo ""
     echo "예시: [FEAT] 사용자 인증 기능 추가"
+    echo "      feat: 사용자 인증 기능 추가"
     echo ""
     exit 1
 fi

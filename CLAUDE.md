@@ -59,37 +59,36 @@ Extractor -> Result: 추출
 
 ## 커밋 메시지 규칙
 
-커밋 메시지는 다음 형식을 따름 (git hook으로 자동 검증):
+커밋 메시지는 다음 형식을 따름 (git hook으로 자동 검증 및 변환):
+
+**허용되는 형식**:
+1. `[TYPE] 제목` - 자동으로 Conventional Commits로 변환됨
+2. `type: 제목` - Conventional Commits (Release Please 호환)
 
 ```
-[TYPE] Title in English
+[FEAT] 사용자 인증 기능 추가
+→ 자동 변환: feat: 사용자 인증 기능 추가
 
-- Bullet points (optional, max 3 lines)
+- 불릿 포인트 (선택, 최대 4줄)
 ```
 
 **허용되는 TYPE**:
-| TYPE | Description |
-|------|-------------|
-| `FEAT` | New feature |
-| `FIX` | Bug fix |
-| `DOCS` | Documentation |
-| `STYLE` | Code formatting |
-| `REFACTOR` | Refactoring |
-| `TEST` | Tests |
-| `CHORE` | Miscellaneous |
-| `PERF` | Performance |
-| `CI` | CI/CD |
-| `BUILD` | Build config |
+| TYPE | 설명 |
+|------|------|
+| `FEAT`/`feat` | 새로운 기능 |
+| `FIX`/`fix` | 버그 수정 |
+| `DOCS`/`docs` | 문서 변경 |
+| `STYLE`/`style` | 코드 포맷팅 |
+| `REFACTOR`/`refactor` | 리팩토링 |
+| `TEST`/`test` | 테스트 |
+| `CHORE`/`chore` | 기타 작업 |
+| `PERF`/`perf` | 성능 개선 |
+| `CI`/`ci` | CI/CD |
+| `BUILD`/`build` | 빌드 설정 |
 
-**예시**:
-```
-[FEAT] Add user authentication
-
-- Implement JWT token-based auth
-- Add login/logout API
-```
-
-**주의**: Claude 서명은 git hook에서 자동 제거됨
+**주의**:
+- Claude 서명은 git hook에서 자동 제거됨
+- `[TYPE]` 형식은 자동으로 `type:` 형식으로 변환되어 Release Please가 인식
 
 ## 개발 프로세스
 
