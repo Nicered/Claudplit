@@ -4,6 +4,8 @@ export enum Role {
   SYSTEM = "SYSTEM",
 }
 
+export type ChatMode = "ask" | "build";
+
 export interface ChatMessage {
   id: string;
   projectId: string;
@@ -28,6 +30,7 @@ export interface ToolUseInfo {
 
 export interface SendMessageInput {
   content: string;
+  mode?: ChatMode;
 }
 
 export type StreamEventType =

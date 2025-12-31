@@ -1,7 +1,5 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { StreamingBlock } from "@/stores/useChatStore";
 import {
   FileText,
@@ -15,6 +13,7 @@ import {
   ListTodo,
   Bot,
 } from "lucide-react";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface StreamingMessageProps {
   blocks: StreamingBlock[];
@@ -85,34 +84,7 @@ function getToolDescription(block: StreamingBlock): string {
 }
 
 function TextBlock({ content }: { content: string }) {
-  return (
-    <div className="prose prose-sm dark:prose-invert max-w-none">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          pre: ({ children }) => (
-            <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-sm">
-              {children}
-            </pre>
-          ),
-          code: ({ className, children, ...props }) => {
-            const isInline = !className;
-            return isInline ? (
-              <code className="bg-muted px-1.5 py-0.5 rounded text-sm" {...props}>
-                {children}
-              </code>
-            ) : (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            );
-          },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
-  );
+  return <MarkdownRenderer content={content} />;
 }
 
 function ToolUseBlock({ block }: { block: StreamingBlock }) {

@@ -57,7 +57,7 @@ export class ChatController {
     @Param("projectId") projectId: string,
     @Body() dto: SendMessageDto
   ): Observable<MessageEvent> {
-    return this.chatService.sendMessage(projectId, dto.content);
+    return this.chatService.sendMessage(projectId, dto.content, dto.mode);
   }
 
   @Post("chat/reset")

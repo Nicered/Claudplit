@@ -1,7 +1,5 @@
 "use client";
 
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
 import type { ChatMessage, Role } from "@claudeship/shared";
 import {
@@ -15,6 +13,7 @@ import {
   ListTodo,
   Bot,
 } from "lucide-react";
+import { MarkdownRenderer } from "./MarkdownRenderer";
 
 interface ToolActivity {
   name: string;
@@ -108,34 +107,11 @@ export function MessageItem({ message }: MessageItemProps) {
           </div>
         )}
 
-        <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="max-w-none">
           {isUser ? (
-            <div className="whitespace-pre-wrap break-words">{message.content}</div>
+            <div className="whitespace-pre-wrap break-words leading-7">{message.content}</div>
           ) : (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                pre: ({ children }) => (
-                  <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-sm">
-                    {children}
-                  </pre>
-                ),
-                code: ({ className, children, ...props }) => {
-                  const isInline = !className;
-                  return isInline ? (
-                    <code className="bg-muted px-1.5 py-0.5 rounded text-sm" {...props}>
-                      {children}
-                    </code>
-                  ) : (
-                    <code className={className} {...props}>
-                      {children}
-                    </code>
-                  );
-                },
-              }}
-            >
-              {message.content}
-            </ReactMarkdown>
+            <MarkdownRenderer content={message.content} />
           )}
         </div>
       </div>

@@ -5,6 +5,7 @@ import { spawn, ChildProcess } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { ChatMode } from "./dto/send-message.dto";
 
 export interface ClaudeStreamEvent {
   type: "init" | "text" | "tool_use" | "tool_result" | "complete" | "error";
@@ -17,6 +18,9 @@ export interface ClaudeStreamEvent {
   sessionId?: string;
   cost?: number;
 }
+
+// Ask mode: read-only tools only
+const ASK_MODE_TOOLS = ["Read", "Glob", "Grep", "LSP", "WebFetch", "WebSearch"];
 
 @Injectable()
 export class ClaudeCliService {
@@ -32,7 +36,8 @@ export class ClaudeCliService {
     projectPath: string,
     prompt: string,
     sessionId: string,
-    resumeSessionId?: string
+    resumeSessionId?: string,
+    mode: ChatMode = "build"
   ): Observable<ClaudeStreamEvent> {
     return new Observable((subscriber) => {
       // Check if project path exists
@@ -53,10 +58,15 @@ export class ClaudeCliService {
       const tempFile = path.join(os.tmpdir(), `claude-prompt-${sessionId}.txt`);
       fs.writeFileSync(tempFile, prompt, "utf-8");
 
-      // Build CLI command with optional resume flag
+      // Build CLI command with optional resume flag and mode-specific tools
       const resumeFlag = resumeSessionId ? `--resume "${resumeSessionId}"` : "";
-      const cliCommand = `${this.cliPath} -p "$(cat '${tempFile}')" ${resumeFlag} --output-format stream-json --verbose --dangerously-skip-permissions`;
+      const toolsFlag = mode === "ask" ? `--tools "${ASK_MODE_TOOLS.join(",")}"` : "";
+      const cliCommand = `${this.cliPath} -p "$(cat '${tempFile}')" ${resumeFlag} ${toolsFlag} --output-format stream-json --verbose --dangerously-skip-permissions`;
       const command = `script -q -c '${cliCommand}' /dev/null`;
+
+      if (mode === "ask") {
+        this.logger.log(`Ask mode: restricting tools to ${ASK_MODE_TOOLS.join(", ")}`);
+      }
 
       this.logger.log(`Using temp file: ${tempFile}`);
       if (resumeSessionId) {
