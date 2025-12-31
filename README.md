@@ -1,14 +1,27 @@
-# ClaudeShip
+<p align="center">
+  <img src="https://nicered.github.io/claudeship/logo.svg" alt="ClaudeShip" width="120">
+</p>
 
-> **Build web applications with natural language** — Describe what you want, AI writes the code
+<h1 align="center">ClaudeShip</h1>
 
-[![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-15-000000?logo=next.js&logoColor=white)](https://nextjs.org/)
-[![NestJS](https://img.shields.io/badge/NestJS-10-E0234E?logo=nestjs&logoColor=white)](https://nestjs.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <strong>Build web applications with natural language</strong><br>
+  Describe what you want, AI writes the code
+</p>
 
-**[한국어 문서](./docs/README.ko.md)**
+<p align="center">
+  <a href="https://www.npmjs.com/package/claudeship"><img src="https://img.shields.io/npm/v/claudeship.svg" alt="npm"></a>
+  <a href="https://nodejs.org/"><img src="https://img.shields.io/badge/Node.js-20+-339933?logo=node.js&logoColor=white" alt="Node.js"></a>
+  <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript&logoColor=white" alt="TypeScript"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"></a>
+</p>
+
+<p align="center">
+  <a href="https://nicered.github.io/claudeship">Website</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#features">Features</a> •
+  <a href="./docs/README.ko.md">한국어</a>
+</p>
 
 ---
 
@@ -91,30 +104,59 @@ Full English and Korean UI support. Switch languages anytime from the header.
 
 ## Quick Start
 
-### Prerequisites
-
-- **Node.js** >= 20.0.0
-- **pnpm** >= 9.0.0
-- **Claude Code CLI** — Install from [claude.ai/code](https://claude.ai/code)
-
-### Installation
+### One Command Install
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/claudeship.git
+npx claudeship
+```
+
+That's it! Open [http://localhost:13000](http://localhost:13000) and start building.
+
+### Prerequisites
+
+- **Node.js** >= 20
+- **pnpm** >= 9
+- **Claude Code CLI** — [claude.ai/code](https://claude.ai/code)
+
+```bash
+# Check if you have all requirements
+npx claudeship doctor
+```
+
+### Installation Options
+
+#### Option 1: npx (Recommended)
+
+```bash
+npx claudeship
+```
+
+#### Option 2: Global Install
+
+```bash
+npm install -g claudeship
+claudeship start
+```
+
+#### Option 3: From Source
+
+```bash
+git clone https://github.com/nicered/claudeship.git
 cd claudeship
-
-# Install dependencies
 pnpm install
-
-# Set up the database
-pnpm --filter @claudeship/server prisma:migrate
-
-# Start development servers
 pnpm dev
 ```
 
-Open [http://localhost:13000](http://localhost:13000) and start building!
+### CLI Commands
+
+```bash
+claudeship              # Start ClaudeShip
+claudeship start        # Same as above
+claudeship doctor       # Check system requirements
+claudeship --help       # Show help
+claudeship -p 3000      # Custom web port
+claudeship -s 4000      # Custom API port
+```
 
 ---
 
@@ -194,6 +236,35 @@ Contributions are welcome! Please follow the commit message convention:
 ```
 
 **Types**: `FEAT`, `FIX`, `DOCS`, `STYLE`, `REFACTOR`, `TEST`, `CHORE`, `PERF`, `CI`, `BUILD`
+
+---
+
+## Releasing
+
+Releases are automated via GitHub Actions. When you create a GitHub release:
+
+1. **Create a release** on GitHub with a tag like `v1.0.0`
+2. **GitHub Actions automatically**:
+   - Builds the project
+   - Updates package.json version from the tag
+   - Publishes to npm
+
+### Manual Release
+
+```bash
+# Bump version
+npm version patch  # or minor, major
+
+# Push with tags
+git push && git push --tags
+```
+
+### Required Secrets
+
+For npm publishing, add `NPM_TOKEN` to your repository secrets:
+
+1. Generate token at [npmjs.com/settings/tokens](https://www.npmjs.com/settings/tokens)
+2. Add to GitHub: Settings → Secrets → Actions → `NPM_TOKEN`
 
 ---
 

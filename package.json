@@ -1,8 +1,10 @@
 {
   "name": "claudeship",
   "version": "0.1.0",
-  "private": true,
   "description": "AI-Powered App Builder using Claude Code CLI",
+  "bin": {
+    "claudeship": "./bin/claudeship.js"
+  },
   "scripts": {
     "prepare": "bash scripts/setup-hooks.sh || true",
     "dev": "node scripts/dev.js",
@@ -14,18 +16,33 @@
     "build:server": "pnpm --filter @claudeship/server build",
     "lint": "pnpm run --parallel lint",
     "type-check": "pnpm run --parallel type-check",
-    "clean": "pnpm run --parallel clean"
+    "clean": "pnpm run --parallel clean",
+    "start": "node bin/claudeship.js"
   },
+  "files": [
+    "bin/",
+    "apps/",
+    "packages/",
+    "scripts/",
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml"
+  ],
   "keywords": [
     "ai",
     "claude",
     "claude-code",
     "app-builder",
     "nextjs",
-    "nestjs"
+    "nestjs",
+    "cli"
   ],
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicered/claudeship.git"
+  },
+  "homepage": "https://github.com/nicered/claudeship#readme",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"

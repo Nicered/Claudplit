@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.next/
+.turbo/
+
+# Development files
+*.log
+.env
+.env.*
+!.env.example
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+.nyc_output/
+
+# Documentation (keep README)
+docs/
+design/
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+
+# Misc
+playground/
+.claude/
+CLAUDE.md
