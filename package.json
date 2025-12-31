@@ -40,9 +40,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/nicered/claudeship.git"
+    "url": "https://github.com/Nicered/ClaudeShip.git"
   },
-  "homepage": "https://github.com/nicered/claudeship#readme",
+  "homepage": "https://github.com/Nicered/ClaudeShip#readme",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
