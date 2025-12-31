@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.1...claudeship-v0.2.2) (2025-12-31)
+
+
+### Bug Fixes
+
+* Separate release workflows for Trusted Publishing ([08d73c8](https://github.com/Nicered/ClaudeShip/commit/08d73c82e96e553607b3039a1fb3a40e0e6e6082))
+
 ## [0.2.1](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.0...claudeship-v0.2.1) (2025-12-31)
 
 
