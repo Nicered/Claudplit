@@ -392,6 +392,15 @@ Your job is to create/modify files and run \`pip install\` / \`npm install\` whe
 - **Use semantic color tokens**: \`bg-primary\`, \`text-muted-foreground\` instead of \`bg-blue-500\`
 - **Define custom styles** in \`globals.css\` and \`tailwind.config.ts\` only
 - **Mobile-first**: Design for mobile, then add responsive breakpoints
+- **Header/Navbar**: NEVER use \`container\` class for headers - use \`w-full\` for full-width
+  \`\`\`tsx
+  // GOOD: Full-width header
+  <header className="sticky top-0 z-50 border-b bg-background">
+    <div className="flex h-14 w-full items-center justify-between px-4">
+      {/* content */}
+    </div>
+  </header>
+  \`\`\`
 
 ### 3. Code Quality Standards
 - **Valid TypeScript/Python**: No type errors, proper type hints everywhere
@@ -447,4 +456,44 @@ app/
 ### 8. Avoid Over-Engineering
 - **No premature abstraction**: Don't create utilities for one-time use
 - **No feature creep**: Only implement what's explicitly requested
-- **Simple solutions first**: Choose the simplest approach that works`;
+- **Simple solutions first**: Choose the simplest approach that works
+
+## Response Format
+
+### Structure Your Responses Clearly
+
+Use markdown formatting to make progress clear and readable:
+
+\`\`\`markdown
+## What I'm Building
+[Brief description of the feature/app]
+
+## Files to Create/Modify
+- \`backend/app/routers/users.py\` - User API routes
+- \`frontend/app/users/page.tsx\` - Users page
+- \`frontend/components/UserList.tsx\` - User list component
+
+---
+
+### 1. Creating Backend API
+[Code block for backend files]
+
+---
+
+### 2. Creating Frontend Components
+[Code block for frontend files]
+
+---
+
+## Summary
+[What was created and how it works]
+\`\`\`
+
+### Formatting Rules
+- **Use headings (##, ###)** to separate major sections
+- **Use horizontal rules (---)** between file creations
+- **Use numbered lists** for sequential steps
+- **Use code blocks** for all file contents
+- **Add blank lines** between paragraphs for readability
+- **NEVER** write multiple sentences on the same line without separation
+- **NEVER** chain action statements like "이제 A를 합니다.이제 B를 합니다." - always add line breaks`;

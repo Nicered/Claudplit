@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { Play, Square, RefreshCw, ExternalLink, Package, Loader2 } from "lucide-react";
+import { useEffect, useState, useRef, useCallback } from "react";
+import { Play, Square, RefreshCw, ExternalLink, Package, Loader2, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePreviewStore } from "@/stores/usePreviewStore";
 import { useTranslation } from "@/lib/i18n";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:14000";
 
 interface PreviewPanelProps {
   projectId: string;
@@ -13,6 +15,10 @@ interface PreviewPanelProps {
 export function PreviewPanel({ projectId }: PreviewPanelProps) {
   const { t } = useTranslation();
   const [isMounted, setIsMounted] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastChange, setLastChange] = useState<string | null>(null);
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const {
     status,
     url,
@@ -31,6 +37,64 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
   const prevReadyRef = useRef(false);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
+
+  // Auto-refresh iframe when file changes detected
+  const handleFileChange = useCallback((filePath: string) => {
+    if (!autoRefresh || status !== "running") return;
+
+    // Extract filename for display
+    const fileName = filePath.split("/").pop() || filePath;
+    setLastChange(fileName);
+
+    // Clear the notification after 2 seconds
+    setTimeout(() => setLastChange(null), 2000);
+
+    // Refresh the iframe
+    if (iframeRef.current) {
+      iframeRef.current.src = iframeRef.current.src;
+    }
+  }, [autoRefresh, status]);
+
+  // Subscribe to file change events
+  useEffect(() => {
+    if (!isMounted || status !== "running") {
+      // Close existing connection
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+      return;
+    }
+
+    // Create SSE connection for file watching
+    const eventSource = new EventSource(
+      `${API_BASE}/projects/${projectId}/preview/watch`
+    );
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "file-change") {
+          handleFileChange(data.path);
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    eventSource.onerror = () => {
+      // Reconnect on error after a delay
+      eventSource.close();
+      eventSourceRef.current = null;
+    };
+
+    eventSourceRef.current = eventSource;
+
+    return () => {
+      eventSource.close();
+      eventSourceRef.current = null;
+    };
+  }, [isMounted, status, projectId, handleFileChange]);
 
   // Mark as mounted after first render
   useEffect(() => {
@@ -145,6 +209,15 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={`h-8 w-8 p-0 ${autoRefresh ? "text-green-500" : "text-muted-foreground"}`}
+                title={autoRefresh ? "Auto-refresh ON" : "Auto-refresh OFF"}
+              >
+                <Zap className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleRefresh}
                 disabled={isLoading}
                 className="h-8 w-8 p-0"
@@ -191,11 +264,21 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : status === "running" && url ? (
-          <iframe
-            key={url}
-            src={url}
-            className="h-full w-full border-0"
-          />
+          <div className="relative h-full w-full">
+            <iframe
+              ref={iframeRef}
+              key={url}
+              src={url}
+              className="h-full w-full border-0"
+            />
+            {/* File change notification */}
+            {lastChange && (
+              <div className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-2 bg-green-500/90 text-white text-xs rounded-lg shadow-lg animate-pulse">
+                <Zap className="h-3 w-3" />
+                <span>{lastChange}</span>
+              </div>
+            )}
+          </div>
         ) : status === "starting" ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center text-muted-foreground">

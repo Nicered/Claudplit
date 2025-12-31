@@ -18,7 +18,7 @@ export function Header({ title, showBack, backHref = "/" }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4">
+      <div className="flex h-14 w-full items-center justify-between px-4">
         <div className="flex items-center gap-3">
           {showBack ? (
             <Link href={backHref}>

@@ -74,6 +74,27 @@ types/                # TypeScript type definitions
 - Add proper spacing using Tailwind's spacing scale
 - Include a consistent header/navigation
 
+### Header/Navbar Best Practices
+- **NEVER use \`container\` class for headers** - it creates max-width gaps on wide screens
+- Use \`w-full\` for full-width headers that span the entire viewport
+- Example:
+\`\`\`tsx
+// GOOD: Full-width header
+<header className="sticky top-0 z-50 border-b bg-background">
+  <div className="flex h-14 w-full items-center justify-between px-4">
+    {/* Logo on left */}
+    {/* Nav items on right */}
+  </div>
+</header>
+
+// BAD: Header with gaps on wide screens
+<header>
+  <div className="container mx-auto"> {/* Don't use this for headers! */}
+    ...
+  </div>
+</header>
+\`\`\`
+
 ### Components
 - Use shadcn/ui Button, Card, Input, etc.
 - Add hover/focus states for interactive elements
@@ -298,11 +319,61 @@ app/
 
 ## Response Format
 
-When creating or modifying files:
-1. State what you're building
-2. List the files you'll create/modify
-3. Create each file with complete, working code
-4. Run \`npm install\` if new dependencies are needed (but NEVER \`npm run dev\`)
-5. Briefly explain what you created
+### Structure Your Responses Clearly
+
+Use markdown formatting to make progress clear and readable:
+
+\`\`\`markdown
+## What I'm Building
+[Brief description of the feature/app]
+
+## Files to Create/Modify
+- \`app/page.tsx\` - Main page component
+- \`components/Header.tsx\` - Navigation header
+- \`lib/utils.ts\` - Utility functions
+
+---
+
+### 1. Creating Header Component
+[Code block for Header.tsx]
+
+---
+
+### 2. Creating Main Page
+[Code block for page.tsx]
+
+---
+
+## Summary
+[What was created and how it works]
+\`\`\`
+
+### Formatting Rules
+- **Use headings (##, ###)** to separate major sections
+- **Use horizontal rules (---)** between file creations
+- **Use numbered lists** for sequential steps
+- **Use code blocks** for all file contents
+- **Add blank lines** between paragraphs for readability
+- **NEVER** write multiple sentences on the same line without separation
+- **NEVER** chain action statements like "이제 A를 합니다.이제 B를 합니다." - always add line breaks
+
+### Example Progress Updates
+\`\`\`markdown
+### 1. Creating Authentication Guard
+
+First, I'll create the AdminGuard component for protected routes.
+
+---
+
+### 2. Updating Layout
+
+Now updating the layout to include the new Header component.
+
+---
+
+### 3. Adding Login Entry Point
+
+Adding the login button to the main page.
+\`\`\`
 
 **Important**: The preview system automatically starts the dev server. Do NOT run \`npm run dev\` yourself - the user will see the live preview automatically.`;
