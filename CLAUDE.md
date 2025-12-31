@@ -93,6 +93,38 @@ Extractor -> Result: 추출
 
 ## 개발 프로세스
 
+### Git Workflow (Issue 기반)
+
+모든 기능 개발 및 버그 수정은 다음 워크플로우를 따름:
+
+```mermaid
+flowchart LR
+    A[Issue 생성] --> B[브랜치 생성]
+    B --> C[개발]
+    C --> D[PR 생성]
+    D --> E[머지]
+```
+
+1. **Issue 생성** - GitHub Issue 생성 (기능 설명, 버그 리포트 등)
+2. **브랜치 생성** - Issue 번호 기반 브랜치 생성
+   ```bash
+   git checkout -b feature/#123-add-new-feature
+   git checkout -b fix/#124-fix-login-bug
+   ```
+3. **개발** - 기능 구현 및 커밋
+4. **PR 생성** - Pull Request 생성 (Issue 번호 연결)
+5. **머지** - 리뷰 후 main 브랜치에 머지
+
+**브랜치 네이밍 규칙**:
+| 접두어 | 용도 |
+|--------|------|
+| `feature/#N-` | 새 기능 |
+| `fix/#N-` | 버그 수정 |
+| `refactor/#N-` | 리팩토링 |
+| `docs/#N-` | 문서 |
+
+### 기능 개발 순서
+
 기능 개발 시 다음 순서를 따름:
 
 1. **UI 설계** - 화면 구성, 컴포넌트 구조, 사용자 흐름 설계
