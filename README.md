@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://nicered.github.io/ClaudeShip/logo.svg" alt="ClaudeShip" width="120">
+  <img src="https://raw.githubusercontent.com/Nicered/ClaudeShip/main/docs/public/logo.svg" alt="ClaudeShip" width="120">
 </p>
 
 <h1 align="center">ClaudeShip</h1>
