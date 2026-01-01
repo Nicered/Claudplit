@@ -166,6 +166,9 @@ export class FileService {
     "application/pdf",
     "text/plain",
     "text/markdown",
+    "text/csv",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   ];
 
   async uploadFiles(

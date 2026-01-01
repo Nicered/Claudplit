@@ -44,6 +44,9 @@ export class FileController {
           "application/pdf",
           "text/plain",
           "text/markdown",
+          "text/csv",
+          "application/vnd.ms-excel",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         ];
         if (allowedMimes.includes(file.mimetype)) {
           cb(null, true);

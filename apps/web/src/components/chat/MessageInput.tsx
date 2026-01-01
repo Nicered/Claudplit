@@ -24,6 +24,9 @@ const ALLOWED_FILE_TYPES = [
   "application/pdf",
   "text/plain",
   "text/markdown",
+  "text/csv",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
