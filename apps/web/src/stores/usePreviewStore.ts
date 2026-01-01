@@ -36,6 +36,7 @@ interface PreviewState {
 
   startPreview: (projectId: string) => Promise<void>;
   stopPreview: (projectId: string) => Promise<void>;
+  restartPreview: (projectId: string) => Promise<void>;
   refreshPreview: () => void;
   fetchStatus: (projectId: string) => Promise<void>;
   checkProjectReady: (projectId: string) => Promise<void>;
@@ -87,6 +88,27 @@ export const usePreviewStore = create<PreviewState>((set, get) => ({
       set({
         error:
           error instanceof Error ? error.message : "Failed to stop preview",
+        isLoading: false,
+      });
+    }
+  },
+
+  restartPreview: async (projectId: string) => {
+    set({ isLoading: true, error: null, status: "starting" });
+    try {
+      const result = await api.post<PreviewStatus>(
+        `/projects/${projectId}/preview/restart`
+      );
+      set({
+        status: result.status,
+        url: result.url || null,
+        isLoading: false,
+      });
+    } catch (error) {
+      set({
+        error:
+          error instanceof Error ? error.message : "Failed to restart preview",
+        status: "error",
         isLoading: false,
       });
     }

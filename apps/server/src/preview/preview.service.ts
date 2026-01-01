@@ -462,7 +462,7 @@ export class PreviewService implements OnModuleDestroy {
     previewInfo.backendProcess = proc;
     previewInfo.backendPid = proc.pid || 0;
 
-    this.setupProcessHandlers(proc, `${previewInfo.projectId}-backend`, previewInfo);
+    this.setupProcessHandlers(proc, `${previewInfo.projectId}-backend`, previewInfo, "backend");
 
     // Wait for backend server
     await this.waitForServer(port, 30000);
@@ -512,7 +512,8 @@ export class PreviewService implements OnModuleDestroy {
   private setupProcessHandlers(
     proc: ChildProcess,
     label: string,
-    previewInfo: PreviewInfo
+    previewInfo: PreviewInfo,
+    processType: "frontend" | "backend" = "frontend"
   ): void {
     proc.stdout?.on("data", (data: Buffer) => {
       this.logger.debug(`[${label}] ${data.toString()}`);
@@ -524,6 +525,30 @@ export class PreviewService implements OnModuleDestroy {
 
     proc.on("close", (code) => {
       this.logger.log(`[${label}] closed with code ${code}`);
+
+      // Update status when process exits unexpectedly
+      if (previewInfo.status === "running") {
+        this.logger.warn(`[${label}] Process exited unexpectedly, updating status to stopped`);
+
+        // Clear the process reference
+        if (processType === "frontend") {
+          previewInfo.process = undefined;
+          previewInfo.pid = 0;
+        } else {
+          previewInfo.backendProcess = undefined;
+          previewInfo.backendPid = 0;
+        }
+
+        // If both processes are gone, mark as stopped
+        const frontendAlive = previewInfo.process && !previewInfo.process.killed;
+        const backendAlive = previewInfo.backendProcess && !previewInfo.backendProcess.killed;
+
+        if (!frontendAlive && !backendAlive) {
+          previewInfo.status = "stopped";
+          this.previews.delete(previewInfo.projectId);
+          this.logger.log(`[${previewInfo.projectId}] Preview stopped (all processes exited)`);
+        }
+      }
     });
 
     proc.on("error", (error) => {
@@ -619,6 +644,19 @@ export class PreviewService implements OnModuleDestroy {
     this.previews.delete(projectId);
 
     return { status: "stopped" };
+  }
+
+  async restart(projectId: string): Promise<PreviewStatus> {
+    this.logger.log(`Restarting preview for project ${projectId}`);
+
+    // Stop existing preview
+    await this.stop(projectId);
+
+    // Wait a moment for ports to be released
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Start again
+    return this.start(projectId);
   }
 
   getPreviewPort(projectId: string): number | null {

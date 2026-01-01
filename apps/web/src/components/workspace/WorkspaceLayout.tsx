@@ -57,18 +57,18 @@ export function WorkspaceLayout({ projectId }: WorkspaceLayoutProps) {
         </div>
       )}
 
-      {/* Chat Panel */}
+      {/* Chat Panel - 30% width */}
       <div
-        className="border-r flex-1"
-        style={{ maxWidth: showFileExplorer ? "calc(50% - 8rem)" : "50%" }}
+        className="border-r flex-shrink-0"
+        style={{ width: showFileExplorer ? "calc(30% - 8rem)" : "30%" }}
       >
         <ChatPanel projectId={projectId} />
       </div>
 
-      {/* Preview Panel */}
+      {/* Preview Panel - 70% width */}
       <div
         className="flex-1"
-        style={{ maxWidth: showFileExplorer ? "calc(50% - 8rem)" : "50%" }}
+        style={{ width: showFileExplorer ? "calc(70%)" : "70%" }}
       >
         <PreviewPanel projectId={projectId} />
       </div>

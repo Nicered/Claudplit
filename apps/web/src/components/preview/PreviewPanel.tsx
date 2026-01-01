@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Play, Square, RefreshCw, ExternalLink, Package, Loader2, Zap } from "lucide-react";
+import { Play, Square, RefreshCw, ExternalLink, Package, Loader2, Zap, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePreviewStore } from "@/stores/usePreviewStore";
 import { useTranslation } from "@/lib/i18n";
@@ -27,6 +27,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     projectReady,
     startPreview,
     stopPreview,
+    restartPreview,
     refreshPreview,
     fetchStatus,
     checkProjectReady,
@@ -187,6 +188,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
 
   const handleStart = () => startPreview(projectId);
   const handleStop = () => stopPreview(projectId);
+  const handleRestart = () => restartPreview(projectId);
   const handleRefresh = () => refreshPreview();
   const handleOpenExternal = () => {
     if (url) {
@@ -243,14 +245,26 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                 onClick={handleRefresh}
                 disabled={isLoading}
                 className="h-8 w-8 p-0"
+                title="Refresh"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={handleRestart}
+                disabled={isLoading}
+                className="h-8 w-8 p-0"
+                title="Restart server"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleOpenExternal}
                 className="h-8 w-8 p-0"
+                title="Open in new tab"
               >
                 <ExternalLink className="h-4 w-4" />
               </Button>
@@ -260,6 +274,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                 onClick={handleStop}
                 disabled={isLoading}
                 className="h-8 w-8 p-0"
+                title="Stop"
               >
                 <Square className="h-4 w-4" />
               </Button>

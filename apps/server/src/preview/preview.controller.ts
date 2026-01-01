@@ -33,6 +33,11 @@ export class PreviewController {
     return this.previewService.stop(projectId);
   }
 
+  @Post("restart")
+  restart(@Param("projectId") projectId: string) {
+    return this.previewService.restart(projectId);
+  }
+
   @Sse("watch")
   async watchFileChanges(
     @Param("projectId") projectId: string,
