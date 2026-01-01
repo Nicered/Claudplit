@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.4...claudeship-v0.2.5) (2026-01-01)
+
+
+### Features
+
+* Add file attachment support in chat ([3de5375](https://github.com/Nicered/ClaudeShip/commit/3de53751330382d29a6a0dd9f8564cab3d14d85b))
+* Add file attachment support in chat ([e598265](https://github.com/Nicered/ClaudeShip/commit/e598265dfff1c680abd56fcc1c718d8c0cc7eb15)), closes [#11](https://github.com/Nicered/ClaudeShip/issues/11)
+
 ## [0.2.4](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.3...claudeship-v0.2.4) (2025-12-31)
 
 
