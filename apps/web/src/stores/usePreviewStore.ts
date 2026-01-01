@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { api } from "@/lib/api";
-import type { PreviewStatus, PreviewStatusType } from "@claudeship/shared";
+import type { PreviewStatus, PreviewStatusType, BackendFramework } from "@claudeship/shared";
 
 interface DirectoryStatus {
   hasPackageJson: boolean;
@@ -8,11 +8,23 @@ interface DirectoryStatus {
   hasDevScript: boolean;
 }
 
+interface BackendDirectoryStatus {
+  // Express (Node.js)
+  hasPackageJson?: boolean;
+  hasNodeModules?: boolean;
+  hasDevScript?: boolean;
+  // FastAPI (Python)
+  hasRequirementsTxt?: boolean;
+  hasVenv?: boolean;
+  hasMainPy?: boolean;
+}
+
 interface ProjectReadyStatus {
   ready: boolean;
   isFullstack: boolean;
+  backendFramework?: BackendFramework;
   frontend: DirectoryStatus;
-  backend?: DirectoryStatus;
+  backend?: BackendDirectoryStatus;
 }
 
 interface PreviewState {

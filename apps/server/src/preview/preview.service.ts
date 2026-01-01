@@ -64,15 +64,19 @@ export class PreviewService implements OnModuleDestroy {
   async checkProjectReady(projectId: string): Promise<{
     ready: boolean;
     isFullstack: boolean;
+    backendFramework?: BackendFramework;
     frontend: {
       hasPackageJson: boolean;
       hasNodeModules: boolean;
       hasDevScript: boolean;
     };
     backend?: {
-      hasPackageJson: boolean;
-      hasNodeModules: boolean;
-      hasDevScript: boolean;
+      hasPackageJson?: boolean;
+      hasNodeModules?: boolean;
+      hasDevScript?: boolean;
+      hasRequirementsTxt?: boolean;
+      hasVenv?: boolean;
+      hasMainPy?: boolean;
     };
   }> {
     const notReady = {
@@ -115,17 +119,34 @@ export class PreviewService implements OnModuleDestroy {
 
       // Check backend for fullstack projects
       const backendPath = path.join(projectPath, "backend");
-      const backendStatus = this.checkDirectoryReady(backendPath);
 
       const frontendReady = frontendStatus.hasPackageJson && frontendStatus.hasDevScript;
-      const backendReady = backendStatus.hasPackageJson && backendStatus.hasDevScript;
 
-      return {
-        ready: frontendReady && backendReady,
-        isFullstack: true,
-        frontend: frontendStatus,
-        backend: backendStatus,
-      };
+      // Check backend based on framework type
+      if (project.backendFramework === BackendFramework.EXPRESS) {
+        const backendStatus = this.checkDirectoryReady(backendPath);
+        const backendReady = backendStatus.hasPackageJson && backendStatus.hasDevScript;
+
+        return {
+          ready: frontendReady && backendReady,
+          isFullstack: true,
+          backendFramework: project.backendFramework,
+          frontend: frontendStatus,
+          backend: backendStatus,
+        };
+      } else {
+        // FastAPI
+        const backendStatus = this.checkPythonDirectoryReady(backendPath);
+        const backendReady = backendStatus.hasRequirementsTxt && backendStatus.hasMainPy;
+
+        return {
+          ready: frontendReady && backendReady,
+          isFullstack: true,
+          backendFramework: project.backendFramework,
+          frontend: frontendStatus,
+          backend: backendStatus,
+        };
+      }
     } catch {
       return notReady;
     }
@@ -156,6 +177,23 @@ export class PreviewService implements OnModuleDestroy {
       hasPackageJson,
       hasNodeModules,
       hasDevScript,
+    };
+  }
+
+  private checkPythonDirectoryReady(dirPath: string): {
+    hasRequirementsTxt: boolean;
+    hasVenv: boolean;
+    hasMainPy: boolean;
+  } {
+    const requirementsTxtPath = path.join(dirPath, "requirements.txt");
+    const venvPath = path.join(dirPath, "venv");
+    const mainPyPath = path.join(dirPath, "app", "main.py");
+    const altMainPyPath = path.join(dirPath, "main.py");
+
+    return {
+      hasRequirementsTxt: fs.existsSync(requirementsTxtPath),
+      hasVenv: fs.existsSync(venvPath),
+      hasMainPy: fs.existsSync(mainPyPath) || fs.existsSync(altMainPyPath),
     };
   }
 

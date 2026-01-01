@@ -347,16 +347,33 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
                 {/* Backend Status (for fullstack) */}
                 {projectReady.isFullstack && projectReady.backend && (
                   <div className="border rounded-lg p-2">
-                    <p className="font-medium mb-1.5 text-foreground">Backend</p>
+                    <p className="font-medium mb-1.5 text-foreground">
+                      Backend {projectReady.backendFramework === "FASTAPI" ? "(Python)" : "(Node.js)"}
+                    </p>
                     <div className="space-y-1">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasPackageJson ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
-                        <span>package.json</span>
-                      </div>
-                      <div className="flex items-center justify-center gap-2">
-                        <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasDevScript ? "bg-green-500" : "bg-gray-300"}`} />
-                        <span>dev script</span>
-                      </div>
+                      {projectReady.backendFramework === "FASTAPI" ? (
+                        <>
+                          <div className="flex items-center justify-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasRequirementsTxt ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
+                            <span>requirements.txt</span>
+                          </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasMainPy ? "bg-green-500" : "bg-gray-300"}`} />
+                            <span>main.py</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasPackageJson ? "bg-green-500" : "bg-gray-300 animate-pulse"}`} />
+                            <span>package.json</span>
+                          </div>
+                          <div className="flex items-center justify-center gap-2">
+                            <div className={`h-2 w-2 rounded-full ${projectReady.backend.hasDevScript ? "bg-green-500" : "bg-gray-300"}`} />
+                            <span>dev script</span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
