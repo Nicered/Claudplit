@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.6](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.5...claudeship-v0.2.6) (2026-01-01)
+
+
+### Bug Fixes
+
+* Add Python/FastAPI backend recognition in preview panel ([509b10f](https://github.com/Nicered/ClaudeShip/commit/509b10f302dbca2d762654e4ddd6c9a2d3fa92db))
+* Add Python/FastAPI backend recognition in preview panel ([8927a37](https://github.com/Nicered/ClaudeShip/commit/8927a37e233045fb7640cbf15b0e6c804dee5656)), closes [#14](https://github.com/Nicered/ClaudeShip/issues/14)
+
 ## [0.2.5](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.4...claudeship-v0.2.5) (2026-01-01)
 
 
