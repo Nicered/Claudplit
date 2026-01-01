@@ -47,6 +47,7 @@ export interface AskUserQuestionData {
 export interface SendMessageInput {
   content: string;
   mode?: ChatMode;
+  attachments?: string[];
 }
 
 export type StreamEventType =

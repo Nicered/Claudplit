@@ -44,6 +44,7 @@
     "queuePlaceholder": "Queue another message...",
     "send": "Send",
     "thinking": "AI is thinking...",
+    "uploading": "Uploading files...",
     "queueCount": "{count} message(s) queued",
     "toolRunning": "Running",
     "toolCompleted": "Completed",

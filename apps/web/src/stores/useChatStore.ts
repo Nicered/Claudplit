@@ -1,6 +1,15 @@
 import { create } from "zustand";
-import { api } from "@/lib/api";
+import { api, type UploadedFile } from "@/lib/api";
 import { Role, type ChatMessage, type StreamEvent, type ChatMode, type AskUserQuestionData } from "@claudeship/shared";
+
+export interface AttachedFile {
+  id: string;
+  file: File;
+  preview?: string;
+  uploadedPath?: string;
+  status: "pending" | "uploading" | "uploaded" | "error";
+  error?: string;
+}
 
 export interface StreamingBlock {
   id: string;
@@ -38,6 +47,8 @@ interface ChatState {
   isProcessingQueue: boolean;
   mode: ChatMode;
   pendingQuestion: AskUserQuestionData | null;
+  attachedFiles: AttachedFile[];
+  isUploading: boolean;
 
   fetchMessages: (projectId: string) => Promise<void>;
   fetchActiveSession: (projectId: string) => Promise<void>;
@@ -49,6 +60,10 @@ interface ChatState {
   clearMessages: () => void;
   clearError: () => void;
   setMode: (mode: ChatMode) => void;
+  addFiles: (files: File[]) => void;
+  removeFile: (id: string) => void;
+  clearFiles: () => void;
+  uploadFiles: (projectId: string) => Promise<string[]>;
 }
 
 export const useChatStore = create<ChatState>((set, get) => ({
@@ -60,8 +75,100 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isProcessingQueue: false,
   mode: "build",
   pendingQuestion: null,
+  attachedFiles: [],
+  isUploading: false,
 
   setMode: (mode: ChatMode) => set({ mode }),
+
+  addFiles: (files: File[]) => {
+    const newFiles: AttachedFile[] = files.map((file) => ({
+      id: `file-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      file,
+      preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+      status: "pending" as const,
+    }));
+    set((state) => ({
+      attachedFiles: [...state.attachedFiles, ...newFiles],
+    }));
+  },
+
+  removeFile: (id: string) => {
+    set((state) => {
+      const file = state.attachedFiles.find((f) => f.id === id);
+      if (file?.preview) {
+        URL.revokeObjectURL(file.preview);
+      }
+      return {
+        attachedFiles: state.attachedFiles.filter((f) => f.id !== id),
+      };
+    });
+  },
+
+  clearFiles: () => {
+    const files = get().attachedFiles;
+    files.forEach((f) => {
+      if (f.preview) URL.revokeObjectURL(f.preview);
+    });
+    set({ attachedFiles: [] });
+  },
+
+  uploadFiles: async (projectId: string): Promise<string[]> => {
+    const pendingFiles = get().attachedFiles.filter((f) => f.status === "pending");
+    if (pendingFiles.length === 0) {
+      return get().attachedFiles
+        .filter((f) => f.status === "uploaded" && f.uploadedPath)
+        .map((f) => f.uploadedPath!);
+    }
+
+    set({ isUploading: true });
+
+    try {
+      set((state) => ({
+        attachedFiles: state.attachedFiles.map((f) =>
+          f.status === "pending" ? { ...f, status: "uploading" as const } : f
+        ),
+      }));
+
+      const result = await api.uploadFiles(
+        projectId,
+        pendingFiles.map((f) => f.file)
+      );
+
+      const uploadedPaths: string[] = [];
+      set((state) => ({
+        attachedFiles: state.attachedFiles.map((f) => {
+          if (f.status === "uploading") {
+            const uploaded = result.files.find(
+              (u) => u.originalName === f.file.name
+            );
+            if (uploaded) {
+              uploadedPaths.push(uploaded.path);
+              return { ...f, status: "uploaded" as const, uploadedPath: uploaded.path };
+            }
+          }
+          return f;
+        }),
+      }));
+
+      return [
+        ...get().attachedFiles
+          .filter((f) => f.status === "uploaded" && f.uploadedPath)
+          .map((f) => f.uploadedPath!),
+      ];
+    } catch (error) {
+      set((state) => ({
+        attachedFiles: state.attachedFiles.map((f) =>
+          f.status === "uploading"
+            ? { ...f, status: "error" as const, error: (error as Error).message }
+            : f
+        ),
+        error: error instanceof Error ? error.message : "Failed to upload files",
+      }));
+      return [];
+    } finally {
+      set({ isUploading: false });
+    }
+  },
 
   fetchMessages: async (projectId: string) => {
     try {
@@ -294,6 +401,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     try {
       const currentMode = get().mode;
+      const attachments = get().attachedFiles
+        .filter((f) => f.status === "uploaded" && f.uploadedPath)
+        .map((f) => f.uploadedPath!);
+
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:14000/api"}/projects/${projectId}/chat`,
         {
@@ -301,7 +412,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ content, mode: currentMode }),
+          body: JSON.stringify({
+            content,
+            mode: currentMode,
+            attachments: attachments.length > 0 ? attachments : undefined,
+          }),
         }
       );
 
@@ -404,6 +519,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } finally {
       // Keep streamingBlocks visible, only mark streaming as done
       set({ isStreaming: false });
+
+      // Clear attached files after sending
+      get().clearFiles();
 
       // Process next message in queue if any
       if (get().messageQueue.length > 0) {
