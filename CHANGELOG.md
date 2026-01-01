@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.9](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.8...claudeship-v0.2.9) (2026-01-01)
+
+
+### Bug Fixes
+
+* Fix Python/FastAPI preview server startup ([91782d0](https://github.com/Nicered/ClaudeShip/commit/91782d0901df385d7a69ea1eb97098bdffac9425))
+* Fix Python/FastAPI preview server startup ([4ead674](https://github.com/Nicered/ClaudeShip/commit/4ead6743b7b541e4eef718a36cb9609170704b9d))
+
 ## [0.2.8](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.7...claudeship-v0.2.8) (2026-01-01)
 
 
