@@ -114,7 +114,8 @@ export class ChatService {
   sendMessage(
     projectId: string,
     content: string,
-    mode: ChatMode = "build"
+    mode: ChatMode = "build",
+    attachments?: string[]
   ): Observable<MessageEvent> {
     const sessionId = randomUUID();
 
@@ -193,7 +194,17 @@ export class ChatService {
 
           // Add mode-specific prompt for Ask mode
           const modePrompt = mode === "ask" ? ASK_MODE_PROMPT : "";
-          const fullPrompt = `[System Context]\n${systemPrompt}${modePrompt}\n\n${conversationContext}[User Request]\n${content}`;
+
+          // Build attachments context if any
+          let attachmentsContext = "";
+          if (attachments && attachments.length > 0) {
+            const attachmentPaths = attachments.map(
+              (relativePath) => `${projectPath}/${relativePath}`
+            );
+            attachmentsContext = `[Attached Files]\nThe user has attached the following files. Please analyze them using the Read tool:\n${attachmentPaths.map((p) => `- ${p}`).join("\n")}\n\n`;
+          }
+
+          const fullPrompt = `[System Context]\n${systemPrompt}${modePrompt}\n\n${conversationContext}${attachmentsContext}[User Request]\n${content}`;
 
           this.logger.log(`Chat mode: ${mode}`);
 

@@ -25,6 +25,15 @@ async function request<T>(
   return response.json();
 }
 
+export interface UploadedFile {
+  id: string;
+  originalName: string;
+  fileName: string;
+  path: string;
+  mimeType: string;
+  size: number;
+}
+
 export const api = {
   get: <T>(endpoint: string) => request<T>(endpoint),
   post: <T>(endpoint: string, data?: unknown) =>
@@ -39,4 +48,25 @@ export const api = {
     }),
   delete: <T>(endpoint: string) =>
     request<T>(endpoint, { method: "DELETE" }),
+
+  uploadFiles: async (
+    projectId: string,
+    files: File[]
+  ): Promise<{ files: UploadedFile[] }> => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append("files", file));
+
+    const url = `${API_BASE_URL}/projects/${projectId}/files/upload`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({ message: "Upload failed" }));
+      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
+  },
 };

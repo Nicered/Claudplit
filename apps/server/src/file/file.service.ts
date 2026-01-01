@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, BadRequestException } from "@nestjs/common";
 import { ProjectService } from "../project/project.service";
 import * as fs from "fs/promises";
 import * as path from "path";
+import { randomUUID } from "crypto";
 
 export interface FileNode {
   name: string;
@@ -10,6 +11,15 @@ export interface FileNode {
   children?: FileNode[];
   size?: number;
   extension?: string;
+}
+
+export interface UploadedFile {
+  id: string;
+  originalName: string;
+  fileName: string;
+  path: string;
+  mimeType: string;
+  size: number;
 }
 
 @Injectable()
@@ -146,5 +156,72 @@ export class FileService {
       env: "dotenv",
     };
     return languageMap[ext] || "plaintext";
+  }
+
+  private readonly allowedMimeTypes = [
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/webp",
+    "application/pdf",
+    "text/plain",
+    "text/markdown",
+  ];
+
+  async uploadFiles(
+    projectId: string,
+    files: Express.Multer.File[]
+  ): Promise<UploadedFile[]> {
+    const projectPath = await this.projectService.getProjectPath(projectId);
+    const uploadsDir = path.join(projectPath, "uploads");
+
+    await fs.mkdir(uploadsDir, { recursive: true });
+
+    const uploadedFiles: UploadedFile[] = [];
+
+    for (const file of files) {
+      if (!this.allowedMimeTypes.includes(file.mimetype)) {
+        throw new BadRequestException(
+          `File type not allowed: ${file.mimetype}`
+        );
+      }
+
+      const id = randomUUID().slice(0, 8);
+      const sanitizedName = file.originalname.replace(/[^a-zA-Z0-9.-]/g, "-");
+      const fileName = `${id}-${sanitizedName}`;
+      const filePath = path.join(uploadsDir, fileName);
+
+      await fs.writeFile(filePath, file.buffer);
+
+      uploadedFiles.push({
+        id,
+        originalName: file.originalname,
+        fileName,
+        path: `uploads/${fileName}`,
+        mimeType: file.mimetype,
+        size: file.size,
+      });
+    }
+
+    return uploadedFiles;
+  }
+
+  async getUploadedFilePath(
+    projectId: string,
+    relativePath: string
+  ): Promise<string> {
+    const projectPath = await this.projectService.getProjectPath(projectId);
+    const fullPath = path.join(projectPath, relativePath);
+
+    if (!fullPath.startsWith(projectPath)) {
+      throw new BadRequestException("Invalid file path");
+    }
+
+    try {
+      await fs.access(fullPath);
+      return fullPath;
+    } catch {
+      throw new NotFoundException("File not found");
+    }
   }
 }

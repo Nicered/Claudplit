@@ -81,6 +81,7 @@ export function ChatPanel({ projectId }: ChatPanelProps) {
       />
       <MessageInput
         onSend={handleSend}
+        projectId={projectId}
         isStreaming={isStreaming}
         queueCount={messageQueue.length}
       />
