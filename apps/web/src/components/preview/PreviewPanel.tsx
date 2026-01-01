@@ -38,6 +38,10 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
   const retryCountRef = useRef(0);
   const maxRetries = 3;
 
+  // Track current status for cleanup (to avoid stale closure issues)
+  const statusRef = useRef(status);
+  statusRef.current = status;
+
   // Auto-refresh iframe when file changes detected
   const handleFileChange = useCallback((filePath: string) => {
     if (!autoRefresh || status !== "running") return;
@@ -101,7 +105,7 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     setIsMounted(true);
   }, []);
 
-  // Cleanup preview when leaving the page
+  // Handle page unload - stop preview using sendBeacon
   useEffect(() => {
     const handleBeforeUnload = () => {
       // Use sendBeacon for reliable delivery during page unload
@@ -113,12 +117,11 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      // Also stop preview on component unmount (navigation)
-      if (status === "running" || status === "starting") {
-        stopPreview(projectId);
-      }
+      // Note: We no longer call stopPreview here because:
+      // 1. SSE connection lifecycle handles it via grace period
+      // 2. React Strict Mode causes double mount/unmount which triggers unwanted stops
     };
-  }, [projectId, status, stopPreview]);
+  }, [projectId]);
 
   // Reset state when project changes
   useEffect(() => {

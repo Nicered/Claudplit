@@ -30,7 +30,9 @@ export class PreviewService implements OnModuleDestroy {
   private readonly logger = new Logger(PreviewService.name);
   private previews: Map<string, PreviewInfo> = new Map();
   private activeConnections: Map<string, number> = new Map(); // projectId -> connection count
+  private pendingStops: Map<string, NodeJS.Timeout> = new Map(); // projectId -> timeout for delayed stop
   private readonly portRange = { min: 3001, max: 3099 };
+  private readonly STOP_GRACE_PERIOD = 5000; // 5 seconds grace period before stopping
 
   constructor(
     private projectService: ProjectService,
@@ -603,6 +605,12 @@ export class PreviewService implements OnModuleDestroy {
   }
 
   async stopAll(): Promise<void> {
+    // Clear all pending stops
+    for (const timeout of this.pendingStops.values()) {
+      clearTimeout(timeout);
+    }
+    this.pendingStops.clear();
+
     for (const [projectId, preview] of this.previews) {
       if (preview.process) {
         preview.process.kill("SIGTERM");
@@ -620,6 +628,14 @@ export class PreviewService implements OnModuleDestroy {
    * Called when SSE client connects.
    */
   registerConnection(projectId: string): void {
+    // Cancel any pending stop
+    const pendingStop = this.pendingStops.get(projectId);
+    if (pendingStop) {
+      clearTimeout(pendingStop);
+      this.pendingStops.delete(projectId);
+      this.logger.debug(`Cancelled pending stop for ${projectId}`);
+    }
+
     const count = this.activeConnections.get(projectId) || 0;
     this.activeConnections.set(projectId, count + 1);
     this.logger.debug(`Connection registered for ${projectId}, total: ${count + 1}`);
@@ -627,16 +643,28 @@ export class PreviewService implements OnModuleDestroy {
 
   /**
    * Unregister a connection for a project.
-   * Automatically stops preview server if no active connections remain.
+   * Schedules preview stop with grace period if no active connections remain.
    */
-  async unregisterConnection(projectId: string): Promise<void> {
+  unregisterConnection(projectId: string): void {
     const count = this.activeConnections.get(projectId) || 0;
     const newCount = Math.max(0, count - 1);
 
     if (newCount === 0) {
       this.activeConnections.delete(projectId);
-      this.logger.log(`No active connections for ${projectId}, stopping preview...`);
-      await this.stop(projectId);
+      this.logger.debug(`No active connections for ${projectId}, scheduling stop in ${this.STOP_GRACE_PERIOD}ms...`);
+
+      // Schedule stop with grace period (allows reconnection)
+      const timeout = setTimeout(() => {
+        this.pendingStops.delete(projectId);
+        // Check again if still no connections
+        const currentCount = this.activeConnections.get(projectId) || 0;
+        if (currentCount === 0) {
+          this.logger.log(`Grace period expired for ${projectId}, stopping preview...`);
+          this.stop(projectId);
+        }
+      }, this.STOP_GRACE_PERIOD);
+
+      this.pendingStops.set(projectId, timeout);
     } else {
       this.activeConnections.set(projectId, newCount);
       this.logger.debug(`Connection unregistered for ${projectId}, remaining: ${newCount}`);

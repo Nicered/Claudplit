@@ -420,6 +420,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }
       );
 
+      // Clear attached files immediately after sending (don't wait for streaming to complete)
+      if (attachments.length > 0) {
+        get().clearFiles();
+      }
+
       if (!response.ok) {
         throw new Error("Failed to send message");
       }
@@ -519,9 +524,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     } finally {
       // Keep streamingBlocks visible, only mark streaming as done
       set({ isStreaming: false });
-
-      // Clear attached files after sending
-      get().clearFiles();
 
       // Process next message in queue if any
       if (get().messageQueue.length > 0) {

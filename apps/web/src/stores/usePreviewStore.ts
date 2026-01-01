@@ -58,7 +58,7 @@ export const usePreviewStore = create<PreviewState>((set, get) => ({
   },
 
   startPreview: async (projectId: string) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: null, status: "starting" });
     try {
       const result = await api.post<PreviewStatus>(
         `/projects/${projectId}/preview/start`
