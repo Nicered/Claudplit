@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.7](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.6...claudeship-v0.2.7) (2026-01-01)
+
+
+### Features
+
+* Add CSV and Excel file support for attachments ([b3ce9fb](https://github.com/Nicered/ClaudeShip/commit/b3ce9fb57d3f981859fa6073bad3a026377aafd5))
+* Add CSV and Excel file support for attachments ([36b8a04](https://github.com/Nicered/ClaudeShip/commit/36b8a04ff70d8951b9b136acabdb8b477c3833fc))
+
 ## [0.2.6](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.5...claudeship-v0.2.6) (2026-01-01)
 
 
