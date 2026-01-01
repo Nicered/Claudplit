@@ -450,11 +450,11 @@ export class PreviewService implements OnModuleDestroy {
       const cmd =
         process.platform === "win32"
           ? `${venvActivate} && uvicorn app.main:app --reload --port ${port}`
-          : `source ${venvActivate} && uvicorn app.main:app --reload --port ${port}`;
+          : `. ${venvActivate} && uvicorn app.main:app --reload --port ${port}`;
 
       proc = spawn(cmd, [], {
         cwd: backendPath,
-        shell: true,
+        shell: process.platform === "win32" ? true : "/bin/bash",
         env: { ...process.env },
       });
     }
@@ -534,16 +534,27 @@ export class PreviewService implements OnModuleDestroy {
 
   private installPythonDependencies(backendPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      const createVenv = spawn("python", ["-m", "venv", "venv"], {
+      this.logger.log(`Creating Python venv in ${backendPath}`);
+
+      // Try python3 first on Linux/Mac, python on Windows
+      const pythonCmd = process.platform === "win32" ? "python" : "python3";
+      const createVenv = spawn(pythonCmd, ["-m", "venv", "venv"], {
         cwd: backendPath,
         shell: true,
       });
 
+      let stderrOutput = "";
+      createVenv.stderr?.on("data", (data) => {
+        stderrOutput += data.toString();
+      });
+
       createVenv.on("close", (code) => {
         if (code !== 0) {
-          reject(new Error("Failed to create venv"));
+          this.logger.error(`Failed to create venv: exit code ${code}, stderr: ${stderrOutput}`);
+          reject(new Error(`Failed to create venv: ${stderrOutput || `exit code ${code}`}`));
           return;
         }
+        this.logger.log("Python venv created successfully");
 
         const venvPip =
           process.platform === "win32"
@@ -556,23 +567,34 @@ export class PreviewService implements OnModuleDestroy {
           return;
         }
 
+        this.logger.log("Installing Python dependencies...");
         const install = spawn(venvPip, ["install", "-r", "requirements.txt"], {
           cwd: backendPath,
           shell: true,
         });
 
+        let pipStderr = "";
+        install.stderr?.on("data", (data) => {
+          pipStderr += data.toString();
+        });
+
         install.on("close", (installCode) => {
           if (installCode === 0) {
+            this.logger.log("Python dependencies installed successfully");
             resolve();
           } else {
-            reject(new Error("pip install failed"));
+            this.logger.error(`pip install failed: exit code ${installCode}, stderr: ${pipStderr}`);
+            reject(new Error(`pip install failed: ${pipStderr || `exit code ${installCode}`}`));
           }
         });
 
         install.on("error", reject);
       });
 
-      createVenv.on("error", reject);
+      createVenv.on("error", (error) => {
+        this.logger.error(`venv creation error: ${error.message}`);
+        reject(error);
+      });
     });
   }
 
