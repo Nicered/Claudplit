@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.12](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.11...claudeship-v0.2.12) (2026-01-02)
+
+
+### Bug Fixes
+
+* Prevent agent from using process control commands ([2490c34](https://github.com/Nicered/ClaudeShip/commit/2490c34c3c1d35608384ac1fab63aa2a5bec27bb))
+* Prevent agent from using process control commands ([73cc74f](https://github.com/Nicered/ClaudeShip/commit/73cc74f8f24e7ee7a139764f06b7760605250b71)), closes [#28](https://github.com/Nicered/ClaudeShip/issues/28)
+
 ## [0.2.11](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.10...claudeship-v0.2.11) (2026-01-02)
 
 
