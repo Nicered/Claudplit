@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.11](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.10...claudeship-v0.2.11) (2026-01-02)
+
+
+### Features
+
+* Add agent-triggered preview restart via special marker ([aa04d1a](https://github.com/Nicered/ClaudeShip/commit/aa04d1ac5f014dac3a7994449a212922e104734f))
+* Add agent-triggered preview restart via special marker ([9668bf5](https://github.com/Nicered/ClaudeShip/commit/9668bf5c39b4acd85480f4ac6e36ded7b68aef61)), closes [#25](https://github.com/Nicered/ClaudeShip/issues/25)
+
 ## [0.2.10](https://github.com/Nicered/ClaudeShip/compare/claudeship-v0.2.9...claudeship-v0.2.10) (2026-01-01)
 
 
