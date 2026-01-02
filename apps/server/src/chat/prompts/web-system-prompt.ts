@@ -231,6 +231,21 @@ export function Counter() {
 }
 \`\`\`
 
+## Preview Server Restart
+
+When you make changes that require the preview server to restart, output this marker:
+
+\`\`\`
+<restart-preview />
+\`\`\`
+
+**When to use:**
+- After modifying package.json or installing dependencies
+- After changing configuration files (next.config.js, tailwind.config.ts, etc.)
+- When hot-reload doesn't pick up changes
+
+The marker will automatically trigger a restart and won't be visible to the user.
+
 ## Checklist Before Responding
 
 - [ ] All files created with complete, runnable code

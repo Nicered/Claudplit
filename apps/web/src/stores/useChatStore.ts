@@ -1,6 +1,12 @@
 import { create } from "zustand";
 import { api, type UploadedFile } from "@/lib/api";
 import { Role, type ChatMessage, type StreamEvent, type ChatMode, type AskUserQuestionData } from "@claudeship/shared";
+import { usePreviewStore } from "./usePreviewStore";
+
+// Marker detection constants
+const RESTART_MARKER_REGEX = /<restart-preview\s*\/>/g;
+const RESTART_DEBOUNCE_MS = 3000;
+let lastRestartTime = 0;
 
 export interface AttachedFile {
   id: string;
@@ -452,15 +458,34 @@ export const useChatStore = create<ChatState>((set, get) => ({
               console.log("[SSE Event]", data.type, data);
 
               if (data.type === "text" && data.content) {
-                // Add text block
-                const textBlock: StreamingBlock = {
-                  id: `text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                  type: "text",
-                  content: data.content,
-                };
-                set((state) => ({
-                  streamingBlocks: [...state.streamingBlocks, textBlock],
-                }));
+                // Check for restart-preview marker
+                const hasRestartMarker = RESTART_MARKER_REGEX.test(data.content);
+                // Reset regex lastIndex after test()
+                RESTART_MARKER_REGEX.lastIndex = 0;
+
+                // Filter out the marker from content
+                const filteredContent = data.content.replace(RESTART_MARKER_REGEX, '').trim();
+
+                // Trigger preview restart with debouncing
+                if (hasRestartMarker) {
+                  const now = Date.now();
+                  if (now - lastRestartTime > RESTART_DEBOUNCE_MS) {
+                    lastRestartTime = now;
+                    usePreviewStore.getState().restartPreview(projectId);
+                  }
+                }
+
+                // Only add text block if there's content after filtering
+                if (filteredContent) {
+                  const textBlock: StreamingBlock = {
+                    id: `text-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    type: "text",
+                    content: filteredContent,
+                  };
+                  set((state) => ({
+                    streamingBlocks: [...state.streamingBlocks, textBlock],
+                  }));
+                }
               } else if (data.type === "tool_use" && data.tool) {
                 // Add tool_use block
                 const toolBlock: StreamingBlock = {

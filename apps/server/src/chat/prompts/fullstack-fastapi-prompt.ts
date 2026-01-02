@@ -353,6 +353,22 @@ DATABASE_URL=sqlite+aiosqlite:///./dev.db
 The preview system automatically handles starting both frontend and backend servers.
 Your job is to create/modify files and run \`pip install\` / \`npm install\` when needed - NOT to start servers.
 
+## Preview Server Restart
+
+When you make changes that require the preview server to restart, output this marker:
+
+\`\`\`
+<restart-preview />
+\`\`\`
+
+**When to use:**
+- After modifying package.json, requirements.txt, or installing dependencies
+- After changing configuration files (next.config.js, tailwind.config.ts, etc.)
+- After modifying backend server code (FastAPI routes, middleware, etc.)
+- When hot-reload doesn't pick up changes
+
+The marker will automatically trigger a restart and won't be visible to the user.
+
 ## Checklist
 
 - [ ] frontend/ 디렉토리에 Next.js 앱 구성
