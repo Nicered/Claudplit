@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Param, Sse, MessageEvent, Res } from "@nestjs/common";
+import { Controller, Get, Post, Delete, Param, Sse, MessageEvent, Res } from "@nestjs/common";
 import { Response } from "express";
-import { Observable, map, takeUntil, Subject, interval, merge } from "rxjs";
-import { PreviewService } from "./preview.service";
+import { Observable, map, takeUntil, Subject, interval, merge, from } from "rxjs";
+import { PreviewService, LogEvent } from "./preview.service";
 import { FileWatcherService, FileChangeEvent } from "./file-watcher.service";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -36,6 +36,47 @@ export class PreviewController {
   @Post("restart")
   restart(@Param("projectId") projectId: string) {
     return this.previewService.restart(projectId);
+  }
+
+  @Get("logs")
+  getLogs(@Param("projectId") projectId: string) {
+    return this.previewService.getLogBuffer(projectId);
+  }
+
+  @Delete("logs")
+  clearLogs(@Param("projectId") projectId: string) {
+    this.previewService.clearLogs(projectId);
+    return { success: true };
+  }
+
+  @Sse("logs/stream")
+  streamLogs(
+    @Param("projectId") projectId: string,
+    @Res() res: Response,
+  ): Observable<MessageEvent> {
+    const closeSubject = new Subject<void>();
+
+    res.on("close", () => {
+      closeSubject.next();
+      closeSubject.complete();
+    });
+
+    // Send heartbeat every 30 seconds
+    const heartbeat$ = interval(30000).pipe(
+      map(() => ({ data: { type: "heartbeat", timestamp: Date.now() } })),
+    );
+
+    // Stream log events
+    const logs$ = this.previewService.getLogStream(projectId).pipe(
+      map((event: LogEvent) => ({
+        data: event,
+      })),
+    );
+
+    return merge(heartbeat$, logs$).pipe(
+      takeUntil(closeSubject),
+      map((event) => ({ data: JSON.stringify(event.data) }) as MessageEvent),
+    );
   }
 
   @Sse("watch")

@@ -3,9 +3,23 @@ import { spawn, ChildProcess } from "child_process";
 import { ProjectService } from "../project/project.service";
 import { PrismaService } from "../prisma/prisma.service";
 import { BackendFramework } from "@prisma/client";
+import { Subject, Observable } from "rxjs";
 import * as net from "net";
 import * as fs from "fs";
 import * as path from "path";
+
+export interface LogEntry {
+  id: string;
+  timestamp: number;
+  level: "stdout" | "stderr";
+  source: "frontend" | "backend";
+  message: string;
+}
+
+export interface LogEvent {
+  type: "log";
+  entry: LogEntry;
+}
 
 export interface PreviewInfo {
   projectId: string;
@@ -33,6 +47,11 @@ export class PreviewService implements OnModuleDestroy {
   private pendingStops: Map<string, NodeJS.Timeout> = new Map(); // projectId -> timeout for delayed stop
   private readonly portRange = { min: 3001, max: 3099 };
   private readonly STOP_GRACE_PERIOD = 5000; // 5 seconds grace period before stopping
+
+  // Log streaming
+  private logBuffers: Map<string, LogEntry[]> = new Map();
+  private logSubjects: Map<string, Subject<LogEvent>> = new Map();
+  private readonly MAX_LOG_ENTRIES = 1000;
 
   constructor(
     private projectService: ProjectService,
@@ -516,11 +535,15 @@ export class PreviewService implements OnModuleDestroy {
     processType: "frontend" | "backend" = "frontend"
   ): void {
     proc.stdout?.on("data", (data: Buffer) => {
-      this.logger.debug(`[${label}] ${data.toString()}`);
+      const message = data.toString();
+      this.logger.debug(`[${label}] ${message}`);
+      this.addLog(previewInfo.projectId, processType, "stdout", message);
     });
 
     proc.stderr?.on("data", (data: Buffer) => {
-      this.logger.debug(`[${label} stderr] ${data.toString()}`);
+      const message = data.toString();
+      this.logger.debug(`[${label} stderr] ${message}`);
+      this.addLog(previewInfo.projectId, processType, "stderr", message);
     });
 
     proc.on("close", (code) => {
@@ -825,5 +848,80 @@ export class PreviewService implements OnModuleDestroy {
         }
       }, 60000);
     });
+  }
+
+  // ==================== Log Streaming Methods ====================
+
+  /**
+   * Add a log entry to the buffer and emit to subscribers
+   */
+  private addLog(
+    projectId: string,
+    source: "frontend" | "backend",
+    level: "stdout" | "stderr",
+    message: string
+  ): void {
+    const entry: LogEntry = {
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      timestamp: Date.now(),
+      level,
+      source,
+      message: message.trim(),
+    };
+
+    // Skip empty messages
+    if (!entry.message) return;
+
+    // Add to buffer
+    let buffer = this.logBuffers.get(projectId);
+    if (!buffer) {
+      buffer = [];
+      this.logBuffers.set(projectId, buffer);
+    }
+    buffer.push(entry);
+
+    // Trim buffer if too large
+    if (buffer.length > this.MAX_LOG_ENTRIES) {
+      buffer.splice(0, buffer.length - this.MAX_LOG_ENTRIES);
+    }
+
+    // Emit to subscribers
+    const subject = this.logSubjects.get(projectId);
+    if (subject) {
+      subject.next({ type: "log", entry });
+    }
+  }
+
+  /**
+   * Get the log subject for a project, creating if needed
+   */
+  getLogSubject(projectId: string): Subject<LogEvent> {
+    let subject = this.logSubjects.get(projectId);
+    if (!subject) {
+      subject = new Subject<LogEvent>();
+      this.logSubjects.set(projectId, subject);
+    }
+    return subject;
+  }
+
+  /**
+   * Get log stream as Observable
+   */
+  getLogStream(projectId: string): Observable<LogEvent> {
+    return this.getLogSubject(projectId).asObservable();
+  }
+
+  /**
+   * Get existing log entries (for initial load)
+   */
+  getLogBuffer(projectId: string): LogEntry[] {
+    return this.logBuffers.get(projectId) || [];
+  }
+
+  /**
+   * Clear logs for a project
+   */
+  clearLogs(projectId: string): void {
+    this.logBuffers.delete(projectId);
   }
 }

@@ -46,8 +46,11 @@ export const api = {
       method: "PUT",
       body: data ? JSON.stringify(data) : undefined,
     }),
-  delete: <T>(endpoint: string) =>
-    request<T>(endpoint, { method: "DELETE" }),
+  delete: <T>(endpoint: string, data?: unknown) =>
+    request<T>(endpoint, {
+      method: "DELETE",
+      body: data ? JSON.stringify(data) : undefined,
+    }),
 
   uploadFiles: async (
     projectId: string,

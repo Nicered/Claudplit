@@ -1,12 +1,24 @@
 "use client";
 
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Play, Square, RefreshCw, ExternalLink, Package, Loader2, Zap, RotateCcw } from "lucide-react";
+import { Play, Square, RefreshCw, ExternalLink, Package, Loader2, Zap, RotateCcw, Terminal, Monitor, Smartphone, Tablet } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { usePreviewStore } from "@/stores/usePreviewStore";
 import { useTranslation } from "@/lib/i18n";
+import { ConsoleViewer } from "./ConsoleViewer";
+import { ErrorOverlay, ErrorInfo, parseErrorFromLog } from "./ErrorOverlay";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:14000";
+
+// Device presets for responsive preview
+const devicePresets = {
+  desktop: { width: "100%", height: "100%", label: "Desktop" },
+  tablet: { width: "768px", height: "1024px", label: "Tablet" },
+  mobile: { width: "375px", height: "667px", label: "Mobile" },
+} as const;
+
+type DeviceType = keyof typeof devicePresets;
 
 interface PreviewPanelProps {
   projectId: string;
@@ -196,6 +208,63 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
     }
   };
 
+  const [activeTab, setActiveTab] = useState<"preview" | "console">("preview");
+  const [device, setDevice] = useState<DeviceType>("desktop");
+  const [buildError, setBuildError] = useState<ErrorInfo | null>(null);
+  const logEventSourceRef = useRef<EventSource | null>(null);
+
+  // Subscribe to log stream for error detection
+  useEffect(() => {
+    if (!isMounted || status !== "running") {
+      if (logEventSourceRef.current) {
+        logEventSourceRef.current.close();
+        logEventSourceRef.current = null;
+      }
+      return;
+    }
+
+    const eventSource = new EventSource(
+      `${API_BASE}/projects/${projectId}/preview/logs/stream`
+    );
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "log" && data.entry && data.entry.level === "stderr") {
+          const errorInfo = parseErrorFromLog(data.entry.message);
+          if (errorInfo) {
+            setBuildError(errorInfo);
+          }
+        }
+      } catch {
+        // Ignore parse errors
+      }
+    };
+
+    eventSource.onerror = () => {
+      eventSource.close();
+      logEventSourceRef.current = null;
+    };
+
+    logEventSourceRef.current = eventSource;
+
+    return () => {
+      eventSource.close();
+      logEventSourceRef.current = null;
+    };
+  }, [isMounted, status, projectId]);
+
+  // Clear error when preview restarts
+  useEffect(() => {
+    if (status === "starting") {
+      setBuildError(null);
+    }
+  }, [status]);
+
+  const handleDismissError = useCallback(() => {
+    setBuildError(null);
+  }, []);
+
   return (
     <div className="flex h-full flex-col border-l">
       {/* Controls */}
@@ -228,6 +297,61 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
         </div>
 
         <div className="flex items-center gap-1">
+          {/* Device Selector (only visible in preview tab when running) */}
+          {activeTab === "preview" && status === "running" && (
+            <div className="flex items-center gap-0.5 mr-2 border-r pr-2">
+              <Button
+                variant={device === "desktop" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setDevice("desktop")}
+                className="h-7 px-2"
+                title="Desktop"
+              >
+                <Monitor className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={device === "tablet" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setDevice("tablet")}
+                className="h-7 px-2"
+                title="Tablet (768x1024)"
+              >
+                <Tablet className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={device === "mobile" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setDevice("mobile")}
+                className="h-7 px-2"
+                title="Mobile (375x667)"
+              >
+                <Smartphone className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          {/* Tab Switcher */}
+          <div className="flex items-center gap-0.5 mr-2 border-r pr-2">
+            <Button
+              variant={activeTab === "preview" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("preview")}
+              className="h-7 px-2"
+              title="Preview"
+            >
+              <Monitor className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={activeTab === "console" ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setActiveTab("console")}
+              className="h-7 px-2"
+              title="Console"
+            >
+              <Terminal className="h-4 w-4" />
+            </Button>
+          </div>
+
           {status === "running" ? (
             <>
               <Button
@@ -294,20 +418,38 @@ export function PreviewPanel({ projectId }: PreviewPanelProps) {
         </div>
       </div>
 
-      {/* Preview Frame */}
-      <div className="flex-1 bg-muted/30">
-        {!isMounted ? (
+      {/* Tab Content */}
+      <div className="flex-1 bg-muted/30 overflow-hidden">
+        {activeTab === "console" ? (
+          <ConsoleViewer projectId={projectId} isRunning={status === "running"} />
+        ) : !isMounted ? (
           <div className="flex h-full items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : status === "running" && url ? (
-          <div className="relative h-full w-full">
+          <div className={`relative h-full w-full ${device !== "desktop" ? "flex items-center justify-center bg-muted/50 p-4" : ""}`}>
             <iframe
               ref={iframeRef}
               key={url}
               src={url}
-              className="h-full w-full border-0"
+              style={{
+                width: devicePresets[device].width,
+                height: devicePresets[device].height,
+                maxWidth: "100%",
+                maxHeight: "100%",
+              }}
+              className={`border-0 ${device !== "desktop" ? "border rounded-lg shadow-lg bg-white" : ""}`}
             />
+            {/* Error Overlay */}
+            {buildError && (
+              <ErrorOverlay error={buildError} onDismiss={handleDismissError} />
+            )}
+            {/* Device size indicator */}
+            {device !== "desktop" && (
+              <div className="absolute bottom-4 left-4 px-2 py-1 bg-black/70 text-white text-xs rounded">
+                {devicePresets[device].label} ({devicePresets[device].width} x {devicePresets[device].height})
+              </div>
+            )}
             {/* File change notification */}
             {lastChange && (
               <div className="absolute bottom-4 right-4 flex items-center gap-2 px-3 py-2 bg-green-500/90 text-white text-xs rounded-lg shadow-lg animate-pulse">

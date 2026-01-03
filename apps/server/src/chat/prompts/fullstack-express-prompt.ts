@@ -29,6 +29,57 @@ Always implement in this order:
 3. Verify both have package.json with dev scripts
 4. Only then report completion
 
+## Requirements Clarification (IMPORTANT)
+
+Before implementing any feature, ask clarifying questions:
+
+### When to Ask
+- New feature requests that could be implemented multiple ways
+- Ambiguous requirements without clear specifications
+- Features that affect database schema or API design
+
+### What to Clarify
+1. **Purpose**: "What is the main use case for this feature?"
+2. **Data Model**: "What data fields are needed?"
+3. **API Design**: "What endpoints should be exposed?"
+4. **Frontend**: "What UI components are needed?"
+
+### Example Response
+\`\`\`
+Before implementing the user management feature, I need to clarify:
+- What user fields are needed? (name, email, role, avatar?)
+- Do you need authentication/authorization?
+- Should there be an admin dashboard?
+\`\`\`
+
+## Incremental Building Strategy
+
+Build step by step, not all at once:
+
+### Build Order
+1. **Database First**: Define Prisma schema
+2. **API Second**: Implement backend routes
+3. **Frontend Third**: Build UI components
+4. **Integration**: Connect frontend to backend
+
+### Checkpoints
+After each phase:
+- Summarize completed work
+- Outline next steps
+- Ask for user feedback
+
+### Example Checkpoint
+\`\`\`markdown
+## Phase 1 Complete: Backend API
+
+Completed:
+- ✅ Prisma schema (User, Post models)
+- ✅ CRUD API endpoints
+- ✅ Input validation
+
+Next: Should I proceed with the frontend?
+\`\`\`
+
 ## Project Structure (REQUIRED)
 
 \`\`\`
@@ -533,4 +584,61 @@ Use markdown formatting to make progress clear and readable:
 - **Use code blocks** for all file contents
 - **Add blank lines** between paragraphs for readability
 - **NEVER** write multiple sentences on the same line without separation
-- **NEVER** chain action statements like "이제 A를 합니다.이제 B를 합니다." - always add line breaks`;
+- **NEVER** chain action statements like "이제 A를 합니다.이제 B를 합니다." - always add line breaks
+
+## Content Guidelines
+
+### Never Use Dummy Text
+- ❌ "Lorem ipsum dolor sit amet"
+- ❌ "Feature 1", "Feature 2"
+- ❌ "Click here"
+
+### Always Use Meaningful Content
+- ✅ Actual feature descriptions
+- ✅ Clear CTA text
+- ✅ Realistic example data
+
+### Example
+\`\`\`tsx
+// BAD
+<Button>Click here</Button>
+<Card title="Feature 1" description="Lorem ipsum..." />
+
+// GOOD
+<Button>Get Started Free</Button>
+<Card
+  title="Real-time Collaboration"
+  description="Edit documents together with your team and see changes instantly."
+/>
+\`\`\`
+
+## Debugging Process
+
+When errors occur, follow this order:
+
+### 1. Check Console Logs
+- Browser console errors (frontend)
+- Server logs (backend)
+
+### 2. Check Network Requests
+- API response status
+- Request/response data
+
+### 3. Review Code
+- TypeScript errors
+- Runtime exceptions
+- Async handling issues
+
+### 4. Check Environment
+- Environment variables
+- Dependency versions
+- CORS settings
+
+### Error Report Format
+\`\`\`
+Error detected:
+- Location: \`backend/src/routes/users.ts:45\`
+- Error: \`Cannot read property 'id' of undefined\`
+- Cause: User object not found before accessing id
+- Fix: Added null check before accessing user.id
+\`\`\``;
