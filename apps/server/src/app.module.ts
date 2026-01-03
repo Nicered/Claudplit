@@ -11,6 +11,7 @@ import { SettingsModule } from "./settings/settings.module";
 import { DatabaseModule } from "./database/database.module";
 import { TestingModule } from "./testing/testing.module";
 import { CheckpointModule } from "./checkpoint/checkpoint.module";
+import { ProjectContextModule } from "./project-context/project-context.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CheckpointModule } from "./checkpoint/checkpoint.module";
     DatabaseModule,
     TestingModule,
     CheckpointModule,
+    ProjectContextModule,
   ],
   controllers: [AppController],
   providers: [AppService],
