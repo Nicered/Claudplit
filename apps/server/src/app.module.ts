@@ -9,6 +9,8 @@ import { PreviewModule } from "./preview/preview.module";
 import { FileModule } from "./file/file.module";
 import { SettingsModule } from "./settings/settings.module";
 import { DatabaseModule } from "./database/database.module";
+import { TestingModule } from "./testing/testing.module";
+import { CheckpointModule } from "./checkpoint/checkpoint.module";
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { DatabaseModule } from "./database/database.module";
     FileModule,
     SettingsModule,
     DatabaseModule,
+    TestingModule,
+    CheckpointModule,
   ],
   controllers: [AppController],
   providers: [AppService],
